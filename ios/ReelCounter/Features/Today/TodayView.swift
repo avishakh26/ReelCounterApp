@@ -121,7 +121,7 @@ struct TodayDashboard: View {
 
             VStack(alignment: .leading, spacing: Spacing.md) {
                 SectionHeader(title: "By app")
-                let todayRows = rows.filter { $0.date == today }
+                let todayRows = rows.filter { $0.date == today }.sorted { $0.platform.sortIndex < $1.platform.sortIndex }
                 if todayRows.isEmpty {
                     Card { EmptyStateView(systemImage: "hourglass", title: "Nothing yet today", message: "Figures appear after a minute or so in a tracked app.") }
                 } else {

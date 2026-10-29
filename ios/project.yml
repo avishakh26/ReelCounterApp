@@ -48,6 +48,8 @@ targets:
       path: ReelCounter/Info.plist
       properties:
         CFBundleDisplayName: ReelCounter
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
           UIColorName: LaunchBackground
         UISupportedInterfaceOrientations:
@@ -83,6 +85,8 @@ targets:
       path: ReelCounterMonitor/Info.plist
       properties:
         CFBundleDisplayName: ReelCounter Monitor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).UsageMonitor
