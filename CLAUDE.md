@@ -144,7 +144,31 @@ Design system in `core/designsystem` (all screens use it; no hard-coded colors o
 - Emulator limits: its YouTube (19.17) is outdated and can't load Shorts; other apps not installed.
   `uiautomator dump` unbinds accessibility services: never use it while testing counting.
 
-## 9. Other files made for the user
+## 9. iPhone app (IN PROGRESS, branch `ios-app`, 2026-10-29)
+
+The user asked for an iPhone version; chose a native SwiftUI app, has **no Mac** and **no Apple
+Developer account yet**. Everything is in `ios/` (see `ios/README.md`), developed on branch `ios-app`
+(not merged to `main`).
+- Built and tested only on GitHub Actions macOS runners (`.github/workflows/ios.yml`): job "Core logic
+  tests" (`swift test` on `ios/ReelCounterCore`) and "App build (simulator)" (XcodeGen + xcodebuild,
+  no signing). Errors are turned into one check-run annotation by `ios/ci/annotate-errors.sh`, readable
+  without login: `curl .../actions/runs?head_sha=<sha>` → jobs → `check-runs/<id>/annotations`.
+- Same Supabase backend and account as Android. iOS can't read other apps' usage directly: Screen Time
+  (FamilyControls + DeviceActivity). The user picks each platform's app in Apple's picker; one
+  DeviceActivity schedule per platform with threshold events (`UsageThresholds`, 45 steps up to 10 h);
+  the `ReelCounterMonitor` extension records the highest step per day/platform in App Group
+  `group.com.reelcounter.app` (`UsageStore`). The app estimates with Android's formula and uploads
+  `daily_activity_summaries` rows (source `usage_stats`, quality ESTIMATED, session_count 0) on open and
+  via BGAppRefresh. No per-video counting on iPhone.
+- Secrets: `ios/Config/Secrets.xcconfig` (git-ignored, hosted values) overrides `App.xcconfig` placeholders.
+- New migration `supabase/migrations/20261029140000_delete_account.sql` (`delete_my_account()`): Apple
+  requires in-app account deletion. Not applied anywhere yet.
+- To ship: Apple Developer Program, Family Controls (Distribution) entitlement request for both bundle
+  ids (`com.reelcounter.app`, `.monitor`), App Group, then TestFlight via CI. Screen Time only works on
+  a real iPhone, never the simulator.
+- Also on this branch: `gradlew` marked executable (Android CI on `main` failed with exit 126 without it).
+
+## 10. Other files made for the user
 
 - `MANUAL_TEST_CHECKLIST.md`: 67 manual QA cases (written before the redesign; screens changed since).
 - `hosted-setup.sql`: the first 3 migrations combined for the hosted SQL Editor.

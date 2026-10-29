@@ -89,6 +89,14 @@ final class SessionStore: ObservableObject {
         }
     }
 
+    #if DEBUG
+    /// Screenshot tests only: shows a signed-in profile without a backend.
+    func seedForScreenshots(profile: Profile, email: String) {
+        self.email = email
+        state = .signedIn(profile)
+    }
+    #endif
+
     // MARK: Sign-in and sign-up
 
     func signIn(email: String, password: String) async throws {

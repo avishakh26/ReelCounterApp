@@ -204,6 +204,15 @@ final class FriendsStore: ObservableObject {
         listeningFor = nil
     }
 
+    #if DEBUG
+    /// Screenshot tests only: shows the given people and figures without a backend.
+    func seedForScreenshots(connections: [Connection], suggestions: [Suggestion], activity: [String: [PlatformDay]]) {
+        self.connections = connections
+        self.suggestions = suggestions
+        self.activity = activity
+    }
+    #endif
+
     func reset() async {
         await stopListening()
         connections = []

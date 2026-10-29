@@ -89,6 +89,14 @@ struct Suggestion: Decodable, Identifiable, Equatable {
     let avatarPath: String?
     let mutualFriends: Int
 
+    init(id: String, username: String?, displayName: String?, avatarPath: String?, mutualFriends: Int) {
+        self.id = id
+        self.username = username
+        self.displayName = displayName
+        self.avatarPath = avatarPath
+        self.mutualFriends = mutualFriends
+    }
+
     enum CodingKeys: String, CodingKey {
         case id, username
         case displayName = "display_name"
@@ -108,6 +116,14 @@ struct Connection: Decodable, Identifiable, Equatable {
     let status: Relationship
 
     var id: String { userId }
+
+    init(userId: String, username: String?, displayName: String?, avatarPath: String?, status: Relationship) {
+        self.userId = userId
+        self.username = username
+        self.displayName = displayName
+        self.avatarPath = avatarPath
+        self.status = status
+    }
 
     enum CodingKeys: String, CodingKey {
         case username, status

@@ -57,3 +57,52 @@ jobs:
       - name: Report errors
         if: failure()
         run: ios/ci/annotate-errors.sh app.log
+
+  screenshots:
+    name: Screenshots
+    runs-on: macos-latest
+    timeout-minutes: 45
+    # Publishing needs write access; only on pushes to this repository's branches.
+    if: github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Render screens on a simulator
+        run: |
+          set -o pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          runtimes = json.load(sys.stdin)['devices']
+          ios = sorted(k for k in runtimes if 'iOS' in k and any(d['name'].startswith('iPhone') for d in runtimes[k]))
+          print(next(d['udid'] for d in runtimes[ios[-1]] if d['name'].startswith('iPhone')))")
+          mkdir -p "$PWD/screenshots"
+          TEST_RUNNER_SNAPSHOT_DIR="$PWD/screenshots" xcodebuild test \
+            -project ios/ReelCounter.xcodeproj \
+            -scheme ReelCounter \
+            -destination "id=$DEVICE" \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee test.log | grep -E "error:|Test Case|TEST" || true
+          ls screenshots
+          test -n "$(ls screenshots)"
+
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh test.log
+
+      # Screenshots go to their own branch so they can be viewed without signing in.
+      - name: Publish to the ios-screenshots branch
+        run: |
+          cd screenshots
+          git init -q -b ios-screenshots
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Screenshots for ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ios-screenshots

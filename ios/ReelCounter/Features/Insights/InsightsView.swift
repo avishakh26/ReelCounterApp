@@ -14,25 +14,7 @@ struct InsightsView: View {
                 let _ = tracking.revision
                 let today = DayKey.today()
                 let keys = today.daysEnding(count: dayCount)
-                let rows = tracking.days(keys)
-                let days = keys.map { rows.summarize(date: $0) }
-
-                if days.daysWithData == 0 {
-                    Card {
-                        EmptyStateView(systemImage: "chart.bar.xaxis", title: "No data yet",
-                                       message: "Insights fill in as Screen Time measures your tracked apps.")
-                    }
-                } else {
-                    summaryCards(days)
-                    VStack(alignment: .leading, spacing: Spacing.md) {
-                        SectionHeader(title: "Last 14 days")
-                        Card { DaysChart(days: days, today: today) }
-                    }
-                    byApp(rows)
-                    Text("Days without data are left out of averages. Estimates come from app time measured by Screen Time.")
-                        .font(.rcCaption)
-                        .foregroundStyle(Palette.textSecondary)
-                }
+                InsightsDashboard(rows: tracking.days(keys), keys: keys, today: today)
             }
             .padding(.horizontal, Spacing.screen)
             .padding(.vertical, Spacing.lg)
@@ -40,6 +22,36 @@ struct InsightsView: View {
         .screenBackground()
         .refreshable { tracking.reload() }
         .toolbar(.hidden, for: .navigationBar)
+    }
+
+}
+
+/// Totals, chart and per-app breakdown for the given days (no data loading here).
+struct InsightsDashboard: View {
+    let rows: [PlatformDay]
+    let keys: [DayKey]
+    let today: DayKey
+
+    var body: some View {
+        let days = keys.map { rows.summarize(date: $0) }
+        VStack(alignment: .leading, spacing: Spacing.section) {
+            if days.daysWithData == 0 {
+                Card {
+                    EmptyStateView(systemImage: "chart.bar.xaxis", title: "No data yet",
+                                   message: "Insights fill in as Screen Time measures your tracked apps.")
+                }
+            } else {
+                summaryCards(days)
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    SectionHeader(title: "Last \(keys.count) days")
+                    Card { DaysChart(days: days, today: today) }
+                }
+                byApp(rows)
+                Text("Days without data are left out of averages. Estimates come from app time measured by Screen Time.")
+                    .font(.rcCaption)
+                    .foregroundStyle(Palette.textSecondary)
+            }
+        }
     }
 
     private func summaryCards(_ days: [DaySummary]) -> some View {

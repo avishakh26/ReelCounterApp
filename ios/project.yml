@@ -90,8 +90,25 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.reelcounter.app.monitor
 
+  # Renders the main screens to PNGs for design review (see ScreenshotTests).
+  ReelCounterTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ReelCounterTests
+    dependencies:
+      - target: ReelCounter
+      - package: ReelCounterCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.reelcounter.app.tests
+
 schemes:
   ReelCounter:
     build:
       targets:
         ReelCounter: all
+    test:
+      targets:
+        - ReelCounterTests

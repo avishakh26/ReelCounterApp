@@ -106,7 +106,7 @@ struct FriendsView: View {
                                   message: "Check the spelling. People who turned off discovery don't appear.") }
         } else {
             PeopleCard(items: results.map(\.person)) { person in
-                switch results.first(where: { $0.id == person.id })?.relationship ?? .none {
+                switch results.first(where: { $0.id == person.id })?.relationship ?? Relationship.none {
                 case .friend: StatusPill(text: "Friends", tone: .positive)
                 case .outgoing: requestedButton(person)
                 case .incoming: acceptButtons(person)

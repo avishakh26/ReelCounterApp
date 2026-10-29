@@ -60,59 +60,12 @@ struct TodayView: View {
 
     @ViewBuilder private var content: some View {
         let _ = tracking.revision
-        let weekKeys = today.daysEnding(count: 7)
-        let rows = tracking.days(weekKeys)
-        let week = weekKeys.map { rows.summarize(date: $0) }
-        let todaySummary = rows.summarize(date: today)
-        let yesterday = week.dropLast().last
-
-        Card(padding: Spacing.xl) {
-            VStack(alignment: .leading, spacing: Spacing.md) {
-                Text("Today").font(.rcLabel).foregroundStyle(Palette.textSecondary)
-                HeroFigure(summary: todaySummary, comparison: yesterday)
-            }
-        }
-
-        if tracking.status != .active {
-            Banner(tone: .estimate, systemImage: "pause.circle.fill", title: "Tracking is off",
-                   message: "Turn it back on to keep measuring app time.")
-                .onTapGesture { showSetup = true }
-        }
-
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            SectionHeader(title: "Last 7 days")
-            Card {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    DaysChart(days: week, today: today)
-                    weekFootnote(week)
-                }
-            }
-        }
-
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            SectionHeader(title: "By app")
-            let todayRows = rows.filter { $0.date == today }
-            if todayRows.isEmpty {
-                Card { EmptyStateView(systemImage: "hourglass", title: "Nothing yet today", message: "Figures appear after a minute or so in a tracked app.") }
-            } else {
-                PlatformList(days: todayRows)
-            }
-        }
-
-        Text("Reels are estimated from app time measured by Screen Time, so they're shown with ≈ and a likely range. iPhone can't count videos one by one.")
-            .font(.rcCaption)
-            .foregroundStyle(Palette.textSecondary)
-    }
-
-    private func weekFootnote(_ week: [DaySummary]) -> some View {
-        var parts: [String] = []
-        if let average = week.averageCount {
-            parts.append("Daily average \(Format.reels(average, isEstimate: week.contains(where: \.isEstimate))) reels")
-        }
-        parts.append("\(week.daysWithData) of 7 days with data")
-        return Text(parts.joined(separator: " · "))
-            .font(.rcCaption)
-            .foregroundStyle(Palette.textSecondary)
+        TodayDashboard(
+            rows: tracking.days(today.daysEnding(count: 7)),
+            today: today,
+            isTrackingOff: tracking.status != .active,
+            onTurnOn: { showSetup = true }
+        )
     }
 
     private var setupCard: some View {
@@ -130,5 +83,66 @@ struct TodayView: View {
                     .buttonStyle(PrimaryButtonStyle())
             }
         }
+    }
+}
+
+/// Today's hero, the week chart and today by app, for the given figures (no data loading here).
+struct TodayDashboard: View {
+    let rows: [PlatformDay]
+    let today: DayKey
+    var isTrackingOff = false
+    var onTurnOn: () -> Void = {}
+
+    var body: some View {
+        let week = today.daysEnding(count: 7).map { rows.summarize(date: $0) }
+        VStack(alignment: .leading, spacing: Spacing.section) {
+            Card(padding: Spacing.xl) {
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    Text("Today").font(.rcLabel).foregroundStyle(Palette.textSecondary)
+                    HeroFigure(summary: rows.summarize(date: today), comparison: week.dropLast().last)
+                }
+            }
+
+            if isTrackingOff {
+                Banner(tone: .estimate, systemImage: "pause.circle.fill", title: "Tracking is off",
+                       message: "Turn it back on to keep measuring app time.")
+                    .onTapGesture(perform: onTurnOn)
+            }
+
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                SectionHeader(title: "Last 7 days")
+                Card {
+                    VStack(alignment: .leading, spacing: Spacing.md) {
+                        DaysChart(days: week, today: today)
+                        weekFootnote(week)
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: Spacing.md) {
+                SectionHeader(title: "By app")
+                let todayRows = rows.filter { $0.date == today }
+                if todayRows.isEmpty {
+                    Card { EmptyStateView(systemImage: "hourglass", title: "Nothing yet today", message: "Figures appear after a minute or so in a tracked app.") }
+                } else {
+                    PlatformList(days: todayRows)
+                }
+            }
+
+            Text("Reels are estimated from app time measured by Screen Time, so they're shown with ≈ and a likely range. iPhone can't count videos one by one.")
+                .font(.rcCaption)
+                .foregroundStyle(Palette.textSecondary)
+        }
+    }
+
+    private func weekFootnote(_ week: [DaySummary]) -> some View {
+        var parts: [String] = []
+        if let average = week.averageCount {
+            parts.append("Daily average \(Format.reels(average, isEstimate: week.contains(where: \.isEstimate))) reels")
+        }
+        parts.append("\(week.daysWithData) of 7 days with data")
+        return Text(parts.joined(separator: " · "))
+            .font(.rcCaption)
+            .foregroundStyle(Palette.textSecondary)
     }
 }
