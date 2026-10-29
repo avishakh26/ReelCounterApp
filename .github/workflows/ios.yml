@@ -1,0 +1,59 @@
+name: iOS
+
+on:
+  push:
+    branches: [main, ios-app]
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', '.github/workflows/ios.yml']
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core logic tests
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: swift test
+        run: |
+          set -o pipefail
+          swift test --package-path ios/ReelCounterCore 2>&1 | tee core.log
+
+      # Errors become one annotation, readable without signing in to GitHub.
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh core.log
+
+  app:
+    name: App build (simulator)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      # No signing and no real Supabase keys: the build uses the committed placeholders.
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild -version
+          xcodebuild build \
+            -project ios/ReelCounter.xcodeproj \
+            -scheme ReelCounter \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee app.log | grep -E "error:|warning: .*deprecated|BUILD" || true
+          grep -q "BUILD SUCCEEDED" app.log
+
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh app.log
