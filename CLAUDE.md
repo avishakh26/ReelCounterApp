@@ -166,7 +166,14 @@ Developer account yet**. Everything is in `ios/` (see `ios/README.md`), develope
 - To ship: Apple Developer Program, Family Controls (Distribution) entitlement request for both bundle
   ids (`com.reelcounter.app`, `.monitor`), App Group, then TestFlight via CI. Screen Time only works on
   a real iPhone, never the simulator.
-- Also on this branch: `gradlew` marked executable (Android CI on `main` failed with exit 126 without it).
+- Design review without a Mac: job "Screenshots" runs `ios/ReelCounterTests/ScreenshotTests.swift` on a
+  simulator (windows must use the host app's `UIWindowScene`, else images are blank) and force-pushes the
+  PNGs to branch `ios-screenshots`; fetch them from raw.githubusercontent.com. Fixtures are test-only;
+  `seedForScreenshots` hooks in FriendsStore/SessionStore are `#if DEBUG`. All 10 screens reviewed light/dark.
+- Also on this branch: `gradlew` marked executable (Android CI on `main` failed with exit 126 without it),
+  and Android **Delete account** (Settings → Account; `AuthRepository.deleteAccount` → avatar files, then
+  `delete_my_account` RPC; Google Play requires it). DB tests for it in `supabase/tests/pglite/run.mjs`
+  (142 pass). Android: 166 unit tests pass with `-PwarningsAsErrors=true`.
 
 ## 10. Other files made for the user
 
