@@ -158,6 +158,14 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 
+    func testFreeEditionToday() throws {
+        try snapshot("11-free-edition-today", height: 852) {
+            screen(title: "Good evening, Avi") {
+                Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
+            }
+        }
+    }
+
     // MARK: Rendering
 
     /// A tab screen's layout: large title and content, scrolling.

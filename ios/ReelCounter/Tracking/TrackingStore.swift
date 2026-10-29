@@ -20,7 +20,21 @@ final class TrackingStore: ObservableObject {
         /// No app has been picked for any platform.
         case needsApps
         case active
+        /// This edition can't use Screen Time: the free build has no Family Controls entitlement.
+        case unavailable
     }
+
+    /**
+     False in the free edition (built with FREE_EDITION for installing with a free Apple ID).
+     Apple only grants Screen Time access (Family Controls) to paid developer accounts.
+     */
+    static let isAvailable: Bool = {
+        #if FREE_EDITION
+        return false
+        #else
+        return true
+        #endif
+    }()
 
     /// Bump when the notice changes so every user sees and accepts it again.
     static let disclosureVersion = 1
@@ -33,7 +47,7 @@ final class TrackingStore: ObservableObject {
 
     let usage = UsageStore.shared()
     private let defaults = UserDefaults.standard
-    private let center = DeviceActivityCenter()
+    private lazy var center = DeviceActivityCenter()
 
     private enum Key {
         static let disclosure = "tracking.disclosureVersion"
@@ -53,7 +67,9 @@ final class TrackingStore: ObservableObject {
     }
 
     func refreshStatus() {
-        if !disclosureAccepted {
+        if !Self.isAvailable {
+            status = .unavailable
+        } else if !disclosureAccepted {
             status = .needsDisclosure
         } else if AuthorizationCenter.shared.authorizationStatus != .approved {
             status = .needsAuthorization
@@ -74,6 +90,7 @@ final class TrackingStore: ObservableObject {
 
     /// Shows Apple's Screen Time permission prompt (Face ID / passcode).
     func requestAuthorization() async {
+        guard Self.isAvailable else { return }
         lastError = nil
         do {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
@@ -99,6 +116,7 @@ final class TrackingStore: ObservableObject {
      Restarting begins counting from now, so it is only done when the picked apps change.
      */
     func startMonitoring() {
+        guard Self.isAvailable else { return }
         center.stopMonitoring()
         let schedule = DeviceActivitySchedule(
             intervalStart: DateComponents(hour: 0, minute: 0, second: 0),
@@ -132,7 +150,7 @@ final class TrackingStore: ObservableObject {
 
     /// Stops measuring and forgets the picked apps and recorded usage (used on sign-out).
     func reset() {
-        center.stopMonitoring()
+        if Self.isAvailable { center.stopMonitoring() }
         selections = [:]
         defaults.removeObject(forKey: Key.selections)
         usage.clear()
@@ -141,7 +159,7 @@ final class TrackingStore: ObservableObject {
 
     /// Stops measuring but keeps the history already recorded.
     func stopTracking() {
-        center.stopMonitoring()
+        if Self.isAvailable { center.stopMonitoring() }
         selections = [:]
         defaults.removeObject(forKey: Key.selections)
         refreshStatus()

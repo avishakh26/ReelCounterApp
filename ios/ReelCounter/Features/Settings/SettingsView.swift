@@ -91,6 +91,7 @@ struct SettingsView: View {
     private var trackingSummary: String {
         switch tracking.status {
         case .active: return "\(tracking.trackedPlatforms.count) apps"
+        case .unavailable: return "Free version"
         default: return "Off"
         }
     }

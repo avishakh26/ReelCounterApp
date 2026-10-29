@@ -17,6 +17,8 @@ struct TodayView: View {
                 header
                 if tracking.status == .active || !tracking.usage.recordedDays().isEmpty {
                     content
+                } else if tracking.status == .unavailable {
+                    Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
                 } else {
                     setupCard
                 }

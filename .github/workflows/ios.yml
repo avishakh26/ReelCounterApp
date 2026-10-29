@@ -106,3 +106,59 @@ jobs:
           git add -A
           git commit -q -m "Screenshots for ${GITHUB_SHA}"
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ios-screenshots
+
+  # The free edition as an unsigned .ipa, for installing with a free Apple ID (e.g. with
+  # Sideloadly, which signs it). Attached to the run as an artifact: download it from the run's
+  # page on GitHub while signed in.
+  free-ipa:
+    name: Free edition (.ipa)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The backend address comes from repository secrets; without them the app shows
+      # "backend not configured".
+      - name: Configure the backend
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::warning title=Backend not set::Add the SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY repository secrets so the free .ipa connects to Supabase."
+            exit 0
+          fi
+          case "$SUPABASE_PUBLISHABLE_KEY" in sb_secret_*) echo "::error::That is a secret key. Use the publishable key."; exit 1;; esac
+          printf 'SUPABASE_URL = %s\nSUPABASE_PUBLISHABLE_KEY = %s\n' "${SUPABASE_URL/:\/\//:\/\$()\/}" "$SUPABASE_PUBLISHABLE_KEY" > ios/Config/Secrets.xcconfig
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Build for iPhone (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project ios/ReelCounter.xcodeproj \
+            -scheme ReelCounterFree \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee free.log | grep -E "error:|BUILD" || true
+          grep -q "BUILD SUCCEEDED" free.log
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/ReelCounterFree.app Payload/
+          zip -qry ReelCounter-free.ipa Payload
+          ls -la ReelCounter-free.ipa
+
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh free.log
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReelCounter-free-ipa
+          path: ReelCounter-free.ipa
+          if-no-files-found: error

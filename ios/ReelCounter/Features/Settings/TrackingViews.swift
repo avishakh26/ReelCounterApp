@@ -12,11 +12,15 @@ struct TrackingSetupView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
-                    stepIndicator
-                    switch tracking.status {
-                    case .needsDisclosure: disclosure
-                    case .needsAuthorization: authorization
-                    case .needsApps, .active: PickAppsSection(showsDone: true) { dismiss() }
+                    if tracking.status == .unavailable {
+                        TrackingUnavailableNotice()
+                    } else {
+                        stepIndicator
+                        switch tracking.status {
+                        case .needsDisclosure: disclosure
+                        case .needsAuthorization: authorization
+                        case .needsApps, .active, .unavailable: PickAppsSection(showsDone: true) { dismiss() }
+                        }
                     }
                 }
                 .padding(Spacing.screen)
@@ -34,7 +38,7 @@ struct TrackingSetupView: View {
         switch tracking.status {
         case .needsDisclosure: return 1
         case .needsAuthorization: return 2
-        case .needsApps, .active: return 3
+        case .needsApps, .active, .unavailable: return 3
         }
     }
 
@@ -192,6 +196,8 @@ struct TrackingSettingsView: View {
                         .buttonStyle(SecondaryButtonStyle(isDestructive: true))
                 case .needsApps:
                     PickAppsSection()
+                case .unavailable:
+                    TrackingUnavailableNotice()
                 default:
                     Banner(tone: .estimate, systemImage: "pause.circle.fill", title: "Tracking is off",
                            message: "Set it up to measure your short-video apps.")
@@ -209,6 +215,32 @@ struct TrackingSettingsView: View {
             Button("Stop tracking", role: .destructive) { tracking.stopTracking() }
         } message: {
             Text("Screen Time stops measuring your apps. Figures already recorded stay.")
+        }
+    }
+}
+
+/// The free edition: why this iPhone's own app time isn't measured, and what still works.
+struct TrackingUnavailableNotice: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
+            Image(systemName: "hourglass.badge.plus")
+                .font(.system(size: 34, weight: .semibold))
+                .foregroundStyle(Palette.accent)
+            Text("Free version").font(.rcTitle).foregroundStyle(Palette.textPrimary)
+            Text("Measuring app time on iPhone uses Apple's Screen Time, which Apple only allows in apps from paid developer accounts. This free version doesn't measure this iPhone.")
+                .font(.rcBody)
+                .foregroundStyle(Palette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Card {
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    Label("Your friends and their daily figures, live", systemImage: "person.2")
+                    Label("Friend requests and suggestions", systemImage: "person.badge.plus")
+                    Label("Your profile and privacy settings", systemImage: "lock")
+                    Label("Your figures from ReelCounter on Android", systemImage: "iphone.and.arrow.forward")
+                }
+                .font(.rcCallout)
+                .foregroundStyle(Palette.textPrimary)
+            }
         }
     }
 }

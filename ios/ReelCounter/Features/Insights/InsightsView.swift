@@ -14,7 +14,11 @@ struct InsightsView: View {
                 let _ = tracking.revision
                 let today = DayKey.today()
                 let keys = today.daysEnding(count: dayCount)
-                InsightsDashboard(rows: tracking.days(keys), keys: keys, today: today)
+                if tracking.status == .unavailable {
+                    Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
+                } else {
+                    InsightsDashboard(rows: tracking.days(keys), keys: keys, today: today)
+                }
             }
             .padding(.horizontal, Spacing.screen)
             .padding(.vertical, Spacing.lg)
