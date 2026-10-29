@@ -33,7 +33,9 @@ lets friends compare. Backend: Supabase (Postgres + RLS, Auth, Realtime).
 
 ## 3. Local environment (this PC)
 
-- Project: `C:\Users\USER\Desktop\Reel-Counter-main` (NOT a git repository).
+- Project: `C:\Users\USER\Desktop\Reel-Counter-main`, a git repo pushed to
+  https://github.com/avishakh26/ReelCounterApp (public, branch `main`). `.gitignore` keeps out
+  `secrets.properties`, `local.properties`, `*.apk`, `bin/` and `*.local.txt` (demo password).
 - JDK 19 on PATH (Gradle needs 17+). JDK tools: `C:\Program Files\Java\jdk-19\bin`.
 - Android SDK installed by CLI at `%LOCALAPPDATA%\Android\Sdk` (platform-tools, emulator,
   `platforms;android-37.0`, `build-tools;37.0.0`, `system-images;android-36;google_apis_playstore;x86_64`).
