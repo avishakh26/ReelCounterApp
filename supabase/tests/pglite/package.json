@@ -1,0 +1,12 @@
+{
+  "name": "reelcounter-sql-tests",
+  "private": true,
+  "type": "module",
+  "description": "Applies supabase/migrations to PGlite and checks constraints and RLS.",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10"
+  }
+}

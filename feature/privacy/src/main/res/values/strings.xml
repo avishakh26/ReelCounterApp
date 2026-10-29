@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_privacy_title">Privacy</string>
+    <string name="feature_privacy_back">Back</string>
+    <string name="feature_privacy_retry">Try again</string>
+    <string name="feature_privacy_load_failed">Couldn\'t load your privacy settings</string>
+
+    <string name="feature_privacy_activity_heading">Who can see my activity</string>
+    <string name="feature_privacy_activity_friends">Friends</string>
+    <string name="feature_privacy_activity_friends_summary">People you\'ve accepted as friends see your daily app time and estimates.</string>
+    <string name="feature_privacy_activity_private">Only me</string>
+    <string name="feature_privacy_activity_private_summary">Friends see your name and photo, but none of your numbers.</string>
+    <string name="feature_privacy_activity_public">Everyone</string>
+    <string name="feature_privacy_activity_public_summary">Anyone signed in to ReelCounter can see your daily app time and estimates.</string>
+    <string name="feature_privacy_activity_note">Changes apply straight away, to past days as well as new ones.</string>
+
+    <string name="feature_privacy_social_heading">Friends and discovery</string>
+    <string name="feature_privacy_online">Show when I\'m online</string>
+    <string name="feature_privacy_online_summary">Friends can see when you have ReelCounter open. Nobody else can.</string>
+    <string name="feature_privacy_discoverable">Let people find me</string>
+    <string name="feature_privacy_discoverable_summary">Others can find you by searching your username. Your email is never searchable.</string>
+    <string name="feature_privacy_requests">Allow friend requests</string>
+    <string name="feature_privacy_requests_summary">When off, nobody can send you a new request. Your current friends stay.</string>
+
+    <string name="feature_privacy_blocked_heading">Blocked accounts</string>
+    <string name="feature_privacy_blocked_empty">You haven\'t blocked anyone.</string>
+    <string name="feature_privacy_unblock">Unblock</string>
+
+    <string name="feature_privacy_error_offline">You\'re offline. Try again when you\'re connected.</string>
+    <string name="feature_privacy_error_unknown">Something went wrong. Please try again.</string>
+    <string name="feature_privacy_save_failed">Couldn\'t save that change. Your previous setting is still in place.</string>
+    <string name="feature_privacy_save_failed_offline">You\'re offline, so that change wasn\'t saved. Your previous setting is still in place.</string>
+</resources>

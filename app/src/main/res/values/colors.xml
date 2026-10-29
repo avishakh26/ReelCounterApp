@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand primary; keep in sync with LightColors.primary (#5B4CDB) in :core:designsystem. -->
+    <color name="ic_launcher_background">#FF5B4CDB</color>
+    <color name="window_background">#FFF6F6F8</color>
+</resources>

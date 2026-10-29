@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_friends_title">Friends</string>
+    <string name="feature_friends_search_label">Search by username</string>
+    <string name="feature_friends_no_results">Nobody found for “%1$s”.</string>
+    <string name="feature_friends_empty_title">No friends yet</string>
+    <string name="feature_friends_empty_message">Search for friends by their username. Once they accept, you can compare your app time.</string>
+    <string name="feature_friends_load_failed">Couldn\'t load your friends</string>
+    <string name="feature_friends_retry">Try again</string>
+
+    <string name="feature_friends_section_friends">Friends</string>
+    <string name="feature_friends_section_sent">Sent</string>
+
+    <string name="feature_friends_add">Add</string>
+    <string name="feature_friends_accept">Accept</string>
+    <string name="feature_friends_decline">Decline</string>
+    <string name="feature_friends_cancel_request">Cancel request</string>
+    <string name="feature_friends_online">Online</string>
+    <string name="feature_friends_more">More options</string>
+    <string name="feature_friends_remove">Remove friend</string>
+    <string name="feature_friends_block">Block</string>
+    <string name="feature_friends_cancel">Cancel</string>
+    <string name="feature_friends_change">Change</string>
+    <string name="feature_friends_visibility_title">Who sees your activity</string>
+    <string name="feature_friends_request_incoming">Wants to be friends</string>
+    <string name="feature_friends_request_sent">Request sent · waiting for them</string>
+    <!-- Section title with its count, e.g. "Friends · 4" -->
+    <string name="feature_friends_section_count">%1$s · %2$d</string>
+
+    <!-- What friends can see right now. Shown above everything on this screen. -->
+    <string name="feature_friends_visibility_friends">Friends you accept can see your daily app time and estimates.</string>
+    <string name="feature_friends_visibility_private">Only you can see your activity. Friends see your name, not your numbers.</string>
+    <string name="feature_friends_visibility_public">Anyone can see your daily app time and estimates.</string>
+
+    <string name="feature_friends_remove_title">Remove %1$s?</string>
+    <string name="feature_friends_remove_text">They won\'t see your activity any more, and you won\'t see theirs. They aren\'t notified.</string>
+    <string name="feature_friends_block_title">Block %1$s?</string>
+    <string name="feature_friends_block_text">You\'ll stop being friends. Neither of you can find, add or see the other until you unblock them in Privacy. They aren\'t notified.</string>
+
+    <string name="feature_friends_msg_requested">Friend request sent</string>
+    <string name="feature_friends_msg_now_friends">You\'re now friends</string>
+    <string name="feature_friends_msg_already_friends">You\'re already friends</string>
+    <string name="feature_friends_msg_already_requested">You\'ve already sent a request</string>
+    <string name="feature_friends_msg_not_accepting">This person isn\'t accepting friend requests</string>
+    <string name="feature_friends_msg_not_found">Couldn\'t find that person</string>
+    <string name="feature_friends_msg_blocked">Blocked</string>
+    <string name="feature_friends_error_network">You\'re offline. Try again when you\'re connected.</string>
+    <string name="feature_friends_error_rate_limited">That\'s a lot of requests. Wait a minute and try again.</string>
+    <string name="feature_friends_error_unknown">Something went wrong. Please try again.</string>
+
+    <!-- Sections -->
+    <string name="feature_friends_tab_friends">Friends</string>
+    <string name="feature_friends_tab_requests">Requests</string>
+    <!-- Requests tab label with a count, e.g. "Requests · 2" -->
+    <string name="feature_friends_tab_requests_count">Requests · %1$d</string>
+    <string name="feature_friends_tab_suggestions">Suggestions</string>
+    <string name="feature_friends_section_received">Received</string>
+    <string name="feature_friends_requests_empty_title">No friend requests</string>
+    <string name="feature_friends_requests_empty_message">Requests you receive and send appear here.</string>
+    <string name="feature_friends_suggestions_empty_title">No suggestions right now</string>
+    <string name="feature_friends_suggestions_empty_message">As more people join and your friends add friends, suggestions appear here. You can also search by username.</string>
+    <string name="feature_friends_suggestions_failed">Couldn\'t load suggestions</string>
+    <plurals name="feature_friends_mutual">
+        <item quantity="one">%1$d mutual friend</item>
+        <item quantity="other">%1$d mutual friends</item>
+    </plurals>
+    <string name="feature_friends_suggested">Suggested for you</string>
+
+    <!-- Friend's figures in the list -->
+    <string name="feature_friends_today_reels">reels today</string>
+    <string name="feature_friends_today_videos">reels today</string>
+    <string name="feature_friends_today_time">app time today</string>
+    <string name="feature_friends_today_none">Nothing shared today</string>
+    <string name="feature_friends_open_profile">Open %1$s\'s profile</string>
+
+    <!-- Friend dashboard -->
+    <string name="feature_friends_detail_back">Back</string>
+    <string name="feature_friends_detail_hero_estimated">Estimated reels today</string>
+    <string name="feature_friends_detail_hero_verified">Reels watched today</string>
+    <string name="feature_friends_detail_hero_time">App time today</string>
+    <string name="feature_friends_detail_hero_empty">Nothing shared today yet</string>
+    <string name="feature_friends_detail_stat_time">App time</string>
+    <string name="feature_friends_detail_stat_yesterday">Yesterday</string>
+    <string name="feature_friends_detail_no_data">No data</string>
+    <string name="feature_friends_detail_week">Last 7 days</string>
+    <string name="feature_friends_detail_by_app">By app</string>
+    <string name="feature_friends_detail_live_note">Updates live when %1$s\'s phone syncs new figures, usually when they open ReelCounter or about once an hour.</string>
+    <string name="feature_friends_detail_empty_title">Nothing shared yet</string>
+    <string name="feature_friends_detail_empty_message">%1$s hasn\'t shared any activity in the last 7 days. They may not have set up tracking, or they show their activity only to themselves.</string>
+    <string name="feature_friends_detail_not_friends_title">You\'re not friends any more</string>
+    <string name="feature_friends_detail_not_friends_message">Only friends can see each other\'s activity.</string>
+    <string name="feature_friends_bar_reels">%1$s: about %2$s reels</string>
+    <string name="feature_friends_bar_videos">%1$s: %2$s reels</string>
+    <string name="feature_friends_bar_time">%1$s: %2$s app time</string>
+    <string name="feature_friends_bar_no_data">%1$s: no data</string>
+</resources>

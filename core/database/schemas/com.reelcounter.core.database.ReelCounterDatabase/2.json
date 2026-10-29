@@ -1,0 +1,304 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "c11c545b700a3ae451b6dea883b916b7",
+    "entities": [
+      {
+        "tableName": "usage_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`package_name` TEXT NOT NULL, `start_ms` INTEGER NOT NULL, `end_ms` INTEGER NOT NULL, `is_open` INTEGER NOT NULL, PRIMARY KEY(`package_name`, `start_ms`))",
+        "fields": [
+          {
+            "fieldPath": "packageName",
+            "columnName": "package_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startMs",
+            "columnName": "start_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endMs",
+            "columnName": "end_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isOpen",
+            "columnName": "is_open",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "package_name",
+            "start_ms"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_usage_sessions_start_ms",
+            "unique": false,
+            "columnNames": [
+              "start_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_usage_sessions_start_ms` ON `${TABLE_NAME}` (`start_ms`)"
+          },
+          {
+            "name": "index_usage_sessions_end_ms",
+            "unique": false,
+            "columnNames": [
+              "end_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_usage_sessions_end_ms` ON `${TABLE_NAME}` (`end_ms`)"
+          }
+        ]
+      },
+      {
+        "tableName": "daily_usage",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` TEXT NOT NULL, `platform_id` TEXT NOT NULL, `foreground_ms` INTEGER NOT NULL, `session_count` INTEGER NOT NULL, `quality` TEXT NOT NULL, `estimated_reels` INTEGER, `estimated_low` INTEGER, `estimated_high` INTEGER, `estimation_version` INTEGER, `user_adjusted` INTEGER NOT NULL, `tz_id` TEXT NOT NULL, `is_final` INTEGER NOT NULL, `revision` INTEGER NOT NULL, `dirty` INTEGER NOT NULL, `sync_error` TEXT, PRIMARY KEY(`date`, `platform_id`))",
+        "fields": [
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "platformId",
+            "columnName": "platform_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "foregroundMs",
+            "columnName": "foreground_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionCount",
+            "columnName": "session_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quality",
+            "columnName": "quality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimatedReels",
+            "columnName": "estimated_reels",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "estimatedLow",
+            "columnName": "estimated_low",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "estimatedHigh",
+            "columnName": "estimated_high",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "estimationVersion",
+            "columnName": "estimation_version",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "userAdjusted",
+            "columnName": "user_adjusted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tzId",
+            "columnName": "tz_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFinal",
+            "columnName": "is_final",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dirty",
+            "columnName": "dirty",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncError",
+            "columnName": "sync_error",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "date",
+            "platform_id"
+          ]
+        }
+      },
+      {
+        "tableName": "day_coverage",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`date` TEXT NOT NULL, `covered_from_ms` INTEGER NOT NULL, `covered_to_ms` INTEGER NOT NULL, PRIMARY KEY(`date`))",
+        "fields": [
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coveredFromMs",
+            "columnName": "covered_from_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coveredToMs",
+            "columnName": "covered_to_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "date"
+          ]
+        }
+      },
+      {
+        "tableName": "platform_settings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`platform_id` TEXT NOT NULL, `is_tracked` INTEGER NOT NULL, `estimation_enabled` INTEGER, `short_form_share` REAL, `seconds_per_reel` REAL, `updated_at_ms` INTEGER NOT NULL, PRIMARY KEY(`platform_id`))",
+        "fields": [
+          {
+            "fieldPath": "platformId",
+            "columnName": "platform_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isTracked",
+            "columnName": "is_tracked",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimationEnabled",
+            "columnName": "estimation_enabled",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "shortFormShare",
+            "columnName": "short_form_share",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "secondsPerReel",
+            "columnName": "seconds_per_reel",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "updatedAtMs",
+            "columnName": "updated_at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "platform_id"
+          ]
+        }
+      },
+      {
+        "tableName": "zone_changes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`at_ms` INTEGER NOT NULL, `zone_id` TEXT NOT NULL, PRIMARY KEY(`at_ms`))",
+        "fields": [
+          {
+            "fieldPath": "atMs",
+            "columnName": "at_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zoneId",
+            "columnName": "zone_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "at_ms"
+          ]
+        }
+      },
+      {
+        "tableName": "ingest_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `watermark_ms` INTEGER NOT NULL, `last_success_ms` INTEGER NOT NULL, `last_revision` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "watermarkMs",
+            "columnName": "watermark_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSuccessMs",
+            "columnName": "last_success_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastRevision",
+            "columnName": "last_revision",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c11c545b700a3ae451b6dea883b916b7')"
+    ]
+  }
+}

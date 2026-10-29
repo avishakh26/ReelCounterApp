@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen states -->
+    <string name="core_ui_state_empty_title">Nothing here yet</string>
+    <string name="core_ui_state_empty_message">There\'s nothing to show right now.</string>
+    <string name="core_ui_state_error_title">Something went wrong</string>
+    <string name="core_ui_state_offline_title">You\'re offline</string>
+    <string name="core_ui_state_offline_message">Reconnect to the internet to load this page.</string>
+    <string name="core_ui_state_retry">Try again</string>
+
+    <!-- Durations. Short units, as in "1 h 12 min". -->
+    <string name="core_ui_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="core_ui_duration_hours">%1$d h</string>
+    <string name="core_ui_duration_minutes">%1$d min</string>
+    <string name="core_ui_duration_under_minute">&lt;1 min</string>
+    <!-- Compact durations for chart labels, as in "1h 12m". -->
+    <string name="core_ui_duration_compact_hours_minutes">%1$dh %2$dm</string>
+    <string name="core_ui_duration_compact_hours">%1$dh</string>
+    <string name="core_ui_duration_compact_minutes">%1$dm</string>
+    <string name="core_ui_duration_compact_under_minute">&lt;1m</string>
+
+    <!-- Metric categories. Wording must match docs/phase-1/02-platform-feasibility.md §3. -->
+    <string name="core_ui_metric_verified">Verified</string>
+    <string name="core_ui_metric_counted">Counted</string>
+    <string name="core_ui_metric_estimated">Estimated</string>
+    <string name="core_ui_metric_duration_only">App time only</string>
+    <string name="core_ui_metric_unavailable">Not tracked</string>
+    <string name="core_ui_metric_user_adjusted">Adjusted by you</string>
+
+    <!-- Verified counts are videos the platform says were started, so they say "videos", not "reels". -->
+    <!-- Units shown under a headline number, e.g. "≈ 42" / "reels". -->
+    <plurals name="core_ui_metric_unit_reels">
+        <item quantity="one">reel</item>
+        <item quantity="other">reels</item>
+    </plurals>
+    <plurals name="core_ui_metric_unit_videos">
+        <item quantity="one">video</item>
+        <item quantity="other">videos</item>
+    </plurals>
+    <string name="core_ui_metric_unit_app_time">app time</string>
+    <string name="core_ui_metric_approx">≈ %1$s</string>
+    <string name="core_ui_metric_no_value">—</string>
+    <string name="core_ui_metric_estimate_range">Likely %1$s–%2$s</string>
+    <string name="core_ui_metric_app_time">%1$s app time</string>
+    <string name="core_ui_metric_verified_through">Verified through %1$s</string>
+    <string name="core_ui_metric_no_count_explainer">No reel count: app time includes more than reels</string>
+    <!-- Joins two facts on one line, e.g. "Likely 60–110 · 47 min app time". -->
+    <string name="core_ui_metric_joined">%1$s · %2$s</string>
+
+    <!-- Why a day has no data -->
+    <string name="core_ui_unavailable_permission_missing">Usage access is off</string>
+    <string name="core_ui_unavailable_tracking_paused">Tracking is paused</string>
+    <string name="core_ui_unavailable_app_not_installed">App isn\'t installed on this device</string>
+    <string name="core_ui_unavailable_coverage_gap">No data was recorded for this period</string>
+    <string name="core_ui_unavailable_not_observable">Web and other-device use can\'t be measured</string>
+</resources>

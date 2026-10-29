@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="feature_tracking_back">Back</string>
+    <string name="feature_tracking_setup_title">Set up tracking</string>
+    <string name="feature_tracking_not_now">Not now</string>
+    <string name="feature_tracking_continue">Continue</string>
+    <string name="feature_tracking_not_installed">Not installed on this device</string>
+    <string name="feature_tracking_open_settings">Open settings</string>
+    <string name="feature_tracking_set_up">Set up tracking</string>
+
+    <!--
+        Prominent disclosure, version 2 (CURRENT_DISCLOSURE_VERSION). Must describe exactly what is
+        collected, shared and how it's used. If that changes, update this text AND bump the
+        version so every user sees and accepts it again.
+        v1 → v2: daily totals are now saved to the user's account.
+    -->
+    <string name="feature_tracking_disclosure_title">How tracking works</string>
+    <string name="feature_tracking_disclosure_intro">To show your app time and reel estimates, ReelCounter needs Android\'s Usage access permission. Here\'s exactly what that means:</string>
+    <string name="feature_tracking_disclosure_collects">ReelCounter reads when the apps you choose (TikTok, Instagram, YouTube, Facebook) were open on screen, and for how long, including the past day your phone has already recorded.</string>
+    <string name="feature_tracking_disclosure_not_collected">It never reads what you watch, read or type, and it never records your screen.</string>
+    <string name="feature_tracking_disclosure_counting">If you also turn on reel counting, ReelCounter\'s accessibility service adds one to a count each time a new video fills the screen in those apps\' short-video feeds. It looks only at the feed\'s layout (which video is on screen), never at captions, names, comments or messages, and stores only the number.</string>
+    <string name="feature_tracking_disclosure_other_apps">Usage of every other app is ignored and never stored.</string>
+    <string name="feature_tracking_disclosure_storage">Each day\'s totals per app (app time and reel estimates) are saved to your ReelCounter account, so they\'re backed up and available on your other devices. The detailed session times stay on this device.</string>
+    <string name="feature_tracking_disclosure_sharing">Friends you accept can see your daily totals. You\'ll be able to choose exactly who sees what in Privacy settings.</string>
+    <string name="feature_tracking_disclosure_estimates">Without reel counting, reel counts are estimates worked out from app time, and they\'re always labeled as estimates.</string>
+    <string name="feature_tracking_disclosure_control">You can pause tracking in Settings or turn off Usage access at any time.</string>
+    <string name="feature_tracking_disclosure_accept">Agree and continue</string>
+
+    <!-- Reel counting (accessibility service) -->
+    <string name="feature_tracking_count_title">Count every reel</string>
+    <string name="feature_tracking_count_body">Turn on ReelCounter reel counting to count each Short, Reel and TikTok you watch, one by one, instead of estimating from app time.</string>
+    <string name="feature_tracking_count_step_1">Tap Open accessibility settings.</string>
+    <string name="feature_tracking_count_step_2">Open Installed apps (or Downloaded apps) and choose ReelCounter reel counting.</string>
+    <string name="feature_tracking_count_step_3">Turn it on and tap Allow, then come back.</string>
+    <string name="feature_tracking_count_restricted_title">Switch greyed out?</string>
+    <string name="feature_tracking_count_restricted_body">On Android 13 and later, apps installed from a file need one extra step: open App info, tap ⋮ in the top corner, choose Allow restricted settings, then try again.</string>
+    <string name="feature_tracking_count_privacy">It looks only at which video is on screen in TikTok, Instagram, YouTube and Facebook. It never reads captions, names or messages and never records your screen. You can turn it off any time.</string>
+    <string name="feature_tracking_count_open">Open accessibility settings</string>
+    <string name="feature_tracking_count_app_info">Open app info</string>
+    <string name="feature_tracking_count_skip">Not now, keep estimates</string>
+    <string name="feature_tracking_count_status_on">Reel counting is on</string>
+    <string name="feature_tracking_count_status_on_summary">Reels are counted one by one as each new video fills the screen.</string>
+    <string name="feature_tracking_count_status_off">Reel counting is off</string>
+    <string name="feature_tracking_count_status_off_summary">Reels are estimated from app time. Turn on counting for exact numbers.</string>
+    <string name="feature_tracking_count_turn_on">Turn on</string>
+
+    <string name="feature_tracking_choose_title">Choose apps to track</string>
+    <string name="feature_tracking_choose_body">You can change this any time in Settings.</string>
+
+    <string name="feature_tracking_access_title">Turn on Usage access</string>
+    <string name="feature_tracking_access_body">Android asks you to allow this in system settings.</string>
+    <string name="feature_tracking_access_step_1">Tap Open settings.</string>
+    <string name="feature_tracking_access_step_2">Find ReelCounter in the list.</string>
+    <string name="feature_tracking_access_step_3">Turn on Permit usage access, then come back.</string>
+    <string name="feature_tracking_access_auto_continue">We\'ll continue automatically when you return.</string>
+
+    <!-- Tracking settings -->
+    <string name="feature_tracking_settings_title">Tracking &amp; apps</string>
+    <string name="feature_tracking_status_not_set_up">Tracking isn\'t set up yet.</string>
+    <string name="feature_tracking_status_no_access">Usage access is off, so nothing new is being recorded.</string>
+    <string name="feature_tracking_status_title_setup">Set up tracking</string>
+    <string name="feature_tracking_status_title_no_access">Usage access is off</string>
+    <string name="feature_tracking_estimates_heading">Estimate settings</string>
+    <string name="feature_tracking_step">Step %1$d of %2$d</string>
+    <string name="feature_tracking_pause">Pause tracking</string>
+    <string name="feature_tracking_paused_summary">Paused. Time spent while paused is never recorded.</string>
+    <string name="feature_tracking_active_summary">Tracking is on</string>
+    <string name="feature_tracking_apps_heading">Apps</string>
+    <string name="feature_tracking_estimate_title">Estimate reel counts</string>
+    <string name="feature_tracking_estimate_on">Shown as estimates with a likely range</string>
+    <string name="feature_tracking_estimate_off">App time only, no count</string>
+    <string name="feature_tracking_share_label">Time spent on short videos: %1$d%%</string>
+    <string name="feature_tracking_seconds_label" tools:ignore="PluralsCandidate">Average seconds per video: %1$d s</string>
+    <string name="feature_tracking_defaults">Defaults: %1$d%% · %2$d s. These are rough assumptions until we calibrate them.</string>
+    <string name="feature_tracking_reset">Reset to defaults</string>
+    <string name="feature_tracking_assumptions_note">Changes apply to today and the last two days. Older days keep the figures they were recorded with.</string>
+</resources>

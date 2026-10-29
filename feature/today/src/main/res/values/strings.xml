@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Greeting header -->
+    <string name="feature_today_greeting_morning">Good morning</string>
+    <string name="feature_today_greeting_afternoon">Good afternoon</string>
+    <string name="feature_today_greeting_evening">Good evening</string>
+    <!-- e.g. "Good evening, Asif" -->
+    <string name="feature_today_greeting_named">%1$s, %2$s</string>
+    <string name="feature_today_open_profile">Your profile and settings</string>
+
+    <!-- First run -->
+    <string name="feature_today_setup_title">See your short-video habits</string>
+    <string name="feature_today_setup_message">Set up tracking to see how many reels you watch in TikTok, Instagram, YouTube and Facebook, and how long you spend there.</string>
+    <string name="feature_today_setup_point_time">App time for each tracked app, measured by Android</string>
+    <string name="feature_today_setup_point_estimates">Every Short, Reel and TikTok counted one by one, once you turn on reel counting</string>
+    <string name="feature_today_setup_point_control">Pause tracking or turn off access whenever you like</string>
+    <string name="feature_today_setup_action">Set up tracking</string>
+
+    <!-- Headline card -->
+    <string name="feature_today_hero_estimated">Estimated reels today</string>
+    <string name="feature_today_hero_verified">Reels watched today</string>
+    <string name="feature_today_hero_app_time">App time today</string>
+    <string name="feature_today_hero_empty">Nothing recorded yet today</string>
+    <string name="feature_today_hero_empty_message">Figures appear after you use a tracked app and come back here.</string>
+    <string name="feature_today_stat_app_time">App time</string>
+    <string name="feature_today_stat_yesterday">Yesterday</string>
+    <string name="feature_today_stat_no_data">No data</string>
+    <string name="feature_today_status_on">Tracking on</string>
+    <string name="feature_today_status_paused">Paused</string>
+    <string name="feature_today_status_no_access">Access off</string>
+
+    <!-- Week -->
+    <string name="feature_today_week_title">Last 7 days</string>
+    <string name="feature_today_week_action">Insights</string>
+    <string name="feature_today_week_average_reels">Daily average ≈ %1$s reels</string>
+    <string name="feature_today_week_average_videos">Daily average %1$s reels</string>
+    <string name="feature_today_week_average_time">Daily average %1$s app time</string>
+    <string name="feature_today_week_days_with_data">%1$d of 7 days with data</string>
+    <string name="feature_today_week_empty">Your week fills in as you use tracked apps.</string>
+    <!-- Screen reader text for one bar, e.g. "Monday 26 October: about 42 reels" -->
+    <string name="feature_today_bar_reels">%1$s: about %2$s reels</string>
+    <string name="feature_today_bar_videos">%1$s: %2$s reels</string>
+    <string name="feature_today_bar_time">%1$s: %2$s app time</string>
+    <string name="feature_today_bar_no_data">%1$s: no data</string>
+
+    <!-- Platforms -->
+    <string name="feature_today_by_app_title">By app</string>
+
+    <string name="feature_today_updated_at">Updated %1$s · pull down to refresh</string>
+    <string name="feature_today_not_updated">Not updated yet · pull down to refresh</string>
+    <string name="feature_today_paused_title">Tracking is paused</string>
+    <string name="feature_today_paused">Time spent now isn\'t recorded. You can resume in Settings › Tracking &amp; apps.</string>
+    <string name="feature_today_access_off_title">Usage access is off</string>
+    <string name="feature_today_access_off">Today\'s figures aren\'t updating until you turn it back on.</string>
+    <string name="feature_today_turn_on">Turn it back on</string>
+    <string name="feature_today_counted_note">Reels are counted one by one as each new video fills the screen. Days from before counting was on show estimates from app time.</string>
+    <string name="feature_today_estimate_note">Reel counts are estimates from app time: Android can\'t see which part of an app you\'re using.</string>
+</resources>

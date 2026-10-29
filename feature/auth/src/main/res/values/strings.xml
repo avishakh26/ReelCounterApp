@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_auth_back">Back</string>
+    <string name="feature_auth_email">Email</string>
+    <string name="feature_auth_password">Password</string>
+
+    <!-- Sign in -->
+    <string name="feature_auth_sign_in_title">Welcome to ReelCounter</string>
+    <string name="feature_auth_sign_in_subtitle">Sign in to see your short-video habits and compare with friends.</string>
+    <string name="feature_auth_sign_in_action">Sign in</string>
+    <string name="feature_auth_forgot_password">Forgot password?</string>
+    <string name="feature_auth_create_account">Create an account</string>
+    <string name="feature_auth_new_here">New to ReelCounter?</string>
+
+    <!-- Sign up -->
+    <string name="feature_auth_sign_up_title">Create your account</string>
+    <string name="feature_auth_sign_up_subtitle">We\'ll email you a code to confirm it\'s you.</string>
+    <string name="feature_auth_sign_up_action">Create account</string>
+    <string name="feature_auth_have_account">I already have an account</string>
+    <plurals name="feature_auth_password_hint">
+        <item quantity="one">At least %1$d character</item>
+        <item quantity="other">At least %1$d characters</item>
+    </plurals>
+    <string name="feature_auth_age_confirmation">I\'m 16 or older</string>
+    <string name="feature_auth_age_confirmation_required">You must be 16 or older to use ReelCounter.</string>
+
+    <!-- Codes -->
+    <string name="feature_auth_verify_title">Check your email</string>
+    <string name="feature_auth_reset_code_title">Enter your reset code</string>
+    <string name="feature_auth_code_sent_to">We sent a code to %1$s.</string>
+    <string name="feature_auth_code_label">%1$d-digit code</string>
+    <string name="feature_auth_verify_action">Verify</string>
+    <string name="feature_auth_resend">Send a new code</string>
+    <string name="feature_auth_resend_in">Send a new code in %1$ds</string>
+    <string name="feature_auth_code_resent">A new code is on its way.</string>
+    <string name="feature_auth_code_spam_hint">Can\'t find it? Check your spam folder. Codes expire after an hour.</string>
+
+    <!-- Password reset -->
+    <string name="feature_auth_forgot_title">Reset your password</string>
+    <string name="feature_auth_forgot_subtitle">Enter your account\'s email and we\'ll send you a code.</string>
+    <string name="feature_auth_send_code">Send code</string>
+    <string name="feature_auth_new_password_title">Choose a new password</string>
+    <string name="feature_auth_new_password_subtitle">Your email is confirmed. Set a new password to continue.</string>
+    <string name="feature_auth_new_password">New password</string>
+    <string name="feature_auth_confirm_password">Confirm new password</string>
+    <string name="feature_auth_save_password">Save password</string>
+    <string name="feature_auth_cancel_reset">Cancel and sign out</string>
+
+    <!-- Field errors -->
+    <string name="feature_auth_email_required">Enter your email</string>
+    <string name="feature_auth_email_invalid">That doesn\'t look like an email address</string>
+    <string name="feature_auth_password_required">Enter your password</string>
+    <plurals name="feature_auth_password_too_short">
+        <item quantity="one">Use at least %1$d character</item>
+        <item quantity="other">Use at least %1$d characters</item>
+    </plurals>
+    <string name="feature_auth_password_too_long">That password is too long</string>
+    <string name="feature_auth_password_mismatch">Passwords don\'t match</string>
+
+    <!-- Server errors -->
+    <string name="feature_auth_error_invalid_credentials">Email or password is incorrect.</string>
+    <string name="feature_auth_error_email_not_confirmed">Confirm your email first. We\'ve sent you a new code.</string>
+    <string name="feature_auth_error_email_registered">An account with this email already exists. Try signing in.</string>
+    <string name="feature_auth_error_password_weak">Choose a stronger password: longer, and less common.</string>
+    <string name="feature_auth_error_password_breached">This password has appeared in a data breach. Choose a different one.</string>
+    <string name="feature_auth_error_same_password">Choose a password you haven\'t used for this account.</string>
+    <string name="feature_auth_error_invalid_code">That code is wrong or has expired. Check the latest email or send a new code.</string>
+    <string name="feature_auth_error_rate_limited">Too many attempts. Wait a minute and try again.</string>
+    <string name="feature_auth_error_signup_disabled">New sign-ups are paused right now.</string>
+    <string name="feature_auth_error_network">Can\'t reach ReelCounter. Check your connection and try again.</string>
+    <string name="feature_auth_error_not_configured">This build isn\'t connected to a server.</string>
+    <string name="feature_auth_error_unknown">Something went wrong. Please try again.</string>
+</resources>

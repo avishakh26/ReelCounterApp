@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_insights_title">Insights</string>
+    <string name="feature_insights_subtitle">Your last 7 days, compared with the 7 before</string>
+    <string name="feature_insights_empty_title">Not enough data yet</string>
+    <string name="feature_insights_empty_message">Trends appear here once tracking has recorded some activity. Set up tracking from the Today tab.</string>
+
+    <string name="feature_insights_metric_reels">Reels</string>
+    <string name="feature_insights_metric_time">App time</string>
+
+    <!-- Summary tiles -->
+    <string name="feature_insights_total">Last 7 days</string>
+    <string name="feature_insights_average">Daily average</string>
+    <string name="feature_insights_change">vs 7 days before</string>
+    <string name="feature_insights_change_up">+%1$d%%</string>
+    <string name="feature_insights_change_down">−%1$d%%</string>
+    <string name="feature_insights_change_same">No change</string>
+    <string name="feature_insights_change_none">No earlier data</string>
+    <string name="feature_insights_change_up_description">%1$d%% more than the 7 days before</string>
+    <string name="feature_insights_change_down_description">%1$d%% less than the 7 days before</string>
+    <string name="feature_insights_partial_note">Includes today so far. Days without data are left out of averages, not counted as zero.</string>
+
+    <!-- Chart -->
+    <string name="feature_insights_chart_title">Day by day</string>
+    <string name="feature_insights_bar_reels">%1$s: about %2$s reels</string>
+    <string name="feature_insights_bar_videos">%1$s: %2$s reels</string>
+    <string name="feature_insights_bar_time">%1$s: %2$s app time</string>
+    <string name="feature_insights_bar_no_data">%1$s: no data</string>
+
+    <!-- Platforms -->
+    <string name="feature_insights_by_app_title">By app</string>
+    <string name="feature_insights_platform_no_data">Nothing recorded this week</string>
+    <string name="feature_insights_platform_zero">No time in this app this week</string>
+    <string name="feature_insights_platform_share">%1$d%% of your week</string>
+
+    <!-- History -->
+    <string name="feature_insights_history_title">History</string>
+    <string name="feature_insights_today">Today</string>
+    <string name="feature_insights_yesterday">Yesterday</string>
+    <string name="feature_insights_no_data">No data</string>
+</resources>

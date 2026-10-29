@@ -1,0 +1,33 @@
+# Supabase CLI configuration for local development (`supabase start`) and `supabase config push`.
+# Only settings that differ from the CLI defaults, or that the app depends on, are listed.
+# Hosted projects: apply the same auth settings in the dashboard (see docs/phase-3/README.md).
+
+project_id = "reelcounter"
+
+[auth]
+enabled = true
+enable_signup = true
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+# Must match PasswordRules.MIN_LENGTH in :core:domain.
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = true
+# Sign-up requires verifying the email with a 6-digit code.
+enable_confirmations = true
+double_confirm_changes = true
+secure_password_change = true
+# Must match OtpRules.LENGTH in :core:domain.
+otp_length = 6
+otp_expiry = 3600
+max_frequency = "60s"
+
+# The default templates send links; ReelCounter verifies with the 6-digit code instead.
+[auth.email.template.confirmation]
+subject = "Your ReelCounter verification code"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Your ReelCounter password reset code"
+content_path = "./supabase/templates/recovery.html"

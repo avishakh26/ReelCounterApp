@@ -1,0 +1,37 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.kotlin/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local configuration: SDK path and secrets. Never commit these.
+local.properties
+secrets.properties
+*.keystore
+*.jks
+google-services.json
+
+# Node (SQL test harness)
+node_modules/
+
+# Supabase CLI local state
+supabase/.branches/
+supabase/.temp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Built APKs and IDE build output
+*.apk
+bin/
+
+# Local-only test logins
+*.local.txt

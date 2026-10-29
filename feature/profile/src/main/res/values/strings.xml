@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="feature_profile_setup_title">Set up your profile</string>
+    <string name="feature_profile_setup_intro">Pick a username so friends can find you. You can change everything here later.</string>
+    <string name="feature_profile_edit_title">Edit profile</string>
+    <string name="feature_profile_back">Back</string>
+    <string name="feature_profile_sign_out">Sign out</string>
+    <string name="feature_profile_change_photo">Change photo</string>
+
+    <string name="feature_profile_username">Username</string>
+    <string name="feature_profile_display_name">Display name</string>
+    <string name="feature_profile_bio">Bio</string>
+    <string name="feature_profile_optional">Optional</string>
+    <string name="feature_profile_continue">Continue</string>
+    <string name="feature_profile_save">Save</string>
+
+    <!-- A range (3–20) is always plural, so a plurals resource adds nothing here. -->
+    <string name="feature_profile_username_rules" tools:ignore="PluralsCandidate">%1$d–%2$d characters: letters, numbers, periods and underscores</string>
+    <string name="feature_profile_username_checking">Checking availability…</string>
+    <string name="feature_profile_username_available">Available</string>
+    <string name="feature_profile_username_check_failed">Couldn\'t check availability. We\'ll check again when you save.</string>
+    <string name="feature_profile_username_taken">That username is taken</string>
+    <string name="feature_profile_username_reserved">That username is reserved</string>
+    <plurals name="feature_profile_username_too_long">
+        <item quantity="one">Use at most %1$d character</item>
+        <item quantity="other">Use at most %1$d characters</item>
+    </plurals>
+    <string name="feature_profile_username_invalid_characters">Use only letters, numbers, periods and underscores</string>
+    <string name="feature_profile_username_edges">Start and end with a letter or number</string>
+    <string name="feature_profile_username_periods">Don\'t use two periods in a row</string>
+
+    <string name="feature_profile_error_invalid_username">Check your username</string>
+    <string name="feature_profile_error_invalid_display_name">Check your display name</string>
+    <string name="feature_profile_error_invalid_bio">Your bio is too long</string>
+    <string name="feature_profile_error_image">We couldn\'t use that photo. Try a different one.</string>
+    <string name="feature_profile_error_signed_out">You\'ve been signed out. Sign in again to save.</string>
+    <string name="feature_profile_error_network">Can\'t reach ReelCounter. Check your connection and try again.</string>
+    <string name="feature_profile_error_unknown">Something went wrong. Please try again.</string>
+</resources>

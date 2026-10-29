@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Placeholder brand mark: a vertical video card with a play symbol cut out, plus a counter dot.
+    The play symbol is a hole (evenOdd), so the same drawable also works as the themed
+    monochrome icon. Everything sits inside the 66dp safe zone of the 108dp canvas.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M42,36 H58 A7,7 0 0 1 65,43 V71 A7,7 0 0 1 58,78 H42 A7,7 0 0 1 35,71 V43 A7,7 0 0 1 42,36 Z M45,49 L45,65 L58,57 Z" />
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M71,33 m-5,0 a5,5 0 1 0 10,0 a5,5 0 1 0 -10,0" />
+
+</vector>

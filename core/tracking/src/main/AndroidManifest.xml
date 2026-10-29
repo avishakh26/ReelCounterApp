@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Usage access. A special app-op the user grants in system settings, after the in-app
+        prominent disclosure (Play User Data policy). Never requested at install.
+    -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!--
+        Package visibility (Android 11+): only the platforms we measure. Keep in sync with
+        PlatformCatalog in :core:domain. QUERY_ALL_PACKAGES is deliberately not used.
+    -->
+    <queries>
+        <package android:name="com.zhiliaoapp.musically" />
+        <package android:name="com.ss.android.ugc.trill" />
+        <package android:name="com.zhiliaoapp.musically.go" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.instagram.lite" />
+        <package android:name="com.google.android.youtube" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.facebook.lite" />
+    </queries>
+
+    <application>
+        <!-- Reel counting (opt-in): the system binds it only after the user turns it on. -->
+        <service
+            android:name=".counting.ReelAccessibilityService"
+            android:exported="false"
+            android:label="@string/core_tracking_counting_service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/core_tracking_reel_counter_accessibility" />
+        </service>
+    </application>
+</manifest>
