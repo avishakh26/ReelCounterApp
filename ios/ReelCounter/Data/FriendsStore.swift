@@ -16,6 +16,9 @@ final class FriendsStore: ObservableObject {
     @Published private(set) var loadError: AppError?
     /// Friends' platform days since a week ago, by user id.
     @Published private(set) var activity: [String: [PlatformDay]] = [:]
+    /// The user's own figures from their account over the last 14 days, as uploaded by their other
+    /// devices (e.g. ReelCounter on Android). Shown by the free edition, which can't measure this iPhone.
+    @Published private(set) var mine: [PlatformDay] = []
     /// People whose request button is busy.
     @Published private(set) var pending: Set<String> = []
     @Published var message: String?
@@ -78,6 +81,22 @@ final class FriendsStore: ObservableObject {
             activity = byUser
         } catch {
             // Keep the previous figures; the list itself still works.
+        }
+    }
+
+    func refreshMine() async {
+        guard let client, let userId = client.auth.currentSession?.user.id.uuidString.lowercased() else { return }
+        let from = DayKey.today().adding(days: -13).rawValue
+        do {
+            let rows: [DailyTotal] = try await client.from("daily_activity_totals")
+                .select()
+                .eq("user_id", value: userId)
+                .gte("activity_date", value: from)
+                .execute()
+                .value
+            mine = rows.compactMap { $0.toPlatformDay() }
+        } catch {
+            // Keep the last figures.
         }
     }
 
@@ -218,5 +237,6 @@ final class FriendsStore: ObservableObject {
         connections = []
         suggestions = []
         activity = [:]
+        mine = []
     }
 }

@@ -4,6 +4,7 @@ import SwiftUI
 /// The last 14 days: totals, daily average, busiest day, and each app's share.
 struct InsightsView: View {
     @EnvironmentObject private var tracking: TrackingStore
+    @EnvironmentObject private var friends: FriendsStore
 
     private let dayCount = 14
 
@@ -15,7 +16,12 @@ struct InsightsView: View {
                 let today = DayKey.today()
                 let keys = today.daysEnding(count: dayCount)
                 if tracking.status == .unavailable {
-                    Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
+                    if friends.mine.isEmpty {
+                        Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
+                    } else {
+                        InsightsDashboard(rows: friends.mine, keys: keys, today: today,
+                                          footnote: "Figures from ReelCounter on your other devices, such as Android. Days without data are left out of averages.")
+                    }
                 } else {
                     InsightsDashboard(rows: tracking.days(keys), keys: keys, today: today)
                 }
@@ -24,7 +30,13 @@ struct InsightsView: View {
             .padding(.vertical, Spacing.lg)
         }
         .screenBackground()
-        .refreshable { tracking.reload() }
+        .refreshable {
+            tracking.reload()
+            if tracking.status == .unavailable { await friends.refreshMine() }
+        }
+        .task {
+            if tracking.status == .unavailable { await friends.refreshMine() }
+        }
         .toolbar(.hidden, for: .navigationBar)
     }
 
@@ -35,6 +47,7 @@ struct InsightsDashboard: View {
     let rows: [PlatformDay]
     let keys: [DayKey]
     let today: DayKey
+    var footnote = "Days without data are left out of averages. Estimates come from app time measured by Screen Time."
 
     var body: some View {
         let days = keys.map { rows.summarize(date: $0) }
@@ -51,7 +64,7 @@ struct InsightsDashboard: View {
                     Card { DaysChart(days: days, today: today) }
                 }
                 byApp(rows)
-                Text("Days without data are left out of averages. Estimates come from app time measured by Screen Time.")
+                Text(footnote)
                     .font(.rcCaption)
                     .foregroundStyle(Palette.textSecondary)
             }

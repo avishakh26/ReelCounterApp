@@ -5,6 +5,7 @@ import SwiftUI
 struct TodayView: View {
     @EnvironmentObject private var session: SessionStore
     @EnvironmentObject private var tracking: TrackingStore
+    @EnvironmentObject private var friends: FriendsStore
     @Environment(\.activitySync) private var sync
     var onOpenSettings: () -> Void
     @State private var showSetup = false
@@ -18,7 +19,11 @@ struct TodayView: View {
                 if tracking.status == .active || !tracking.usage.recordedDays().isEmpty {
                     content
                 } else if tracking.status == .unavailable {
-                    Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
+                    if friends.mine.isEmpty {
+                        Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
+                    } else {
+                        TodayDashboard(rows: friends.mine, today: today, footnote: TodayDashboard.accountFootnote)
+                    }
                 } else {
                     setupCard
                 }
@@ -30,6 +35,10 @@ struct TodayView: View {
         .refreshable {
             tracking.reload()
             await sync?.syncNow()
+            if tracking.status == .unavailable { await friends.refreshMine() }
+        }
+        .task {
+            if tracking.status == .unavailable { await friends.refreshMine() }
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showSetup) {
@@ -94,6 +103,10 @@ struct TodayDashboard: View {
     let today: DayKey
     var isTrackingOff = false
     var onTurnOn: () -> Void = {}
+    var footnote = "Reels are estimated from app time measured by Screen Time, so they're shown with ≈ and a likely range. iPhone can't count videos one by one."
+
+    /// For figures read from the account (the free edition): they come from the user's other devices.
+    static let accountFootnote = "Figures from ReelCounter on your other devices, such as Android. This free iPhone version doesn't measure this iPhone. Estimates are shown with ≈ and a likely range."
 
     var body: some View {
         let week = today.daysEnding(count: 7).map { rows.summarize(date: $0) }
@@ -131,7 +144,7 @@ struct TodayDashboard: View {
                 }
             }
 
-            Text("Reels are estimated from app time measured by Screen Time, so they're shown with ≈ and a likely range. iPhone can't count videos one by one.")
+            Text(footnote)
                 .font(.rcCaption)
                 .foregroundStyle(Palette.textSecondary)
         }

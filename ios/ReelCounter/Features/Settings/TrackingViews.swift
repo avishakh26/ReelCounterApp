@@ -233,15 +233,26 @@ struct TrackingUnavailableNotice: View {
                 .fixedSize(horizontal: false, vertical: true)
             Card {
                 VStack(alignment: .leading, spacing: Spacing.md) {
-                    Label("Your friends and their daily figures, live", systemImage: "person.2")
-                    Label("Friend requests and suggestions", systemImage: "person.badge.plus")
-                    Label("Your profile and privacy settings", systemImage: "lock")
-                    Label("Your figures from ReelCounter on Android", systemImage: "iphone.and.arrow.forward")
+                    bullet("person.2", "Your friends and their daily figures, live")
+                    bullet("person.badge.plus", "Friend requests and suggestions")
+                    bullet("lock", "Your profile and privacy settings")
+                    bullet("iphone.and.arrow.forward", "Your own figures from ReelCounter on Android")
                 }
-                .font(.rcCallout)
-                .foregroundStyle(Palette.textPrimary)
             }
         }
+    }
+}
+
+private func bullet(_ systemImage: String, _ text: String) -> some View {
+    HStack(alignment: .top, spacing: Spacing.md) {
+        Image(systemName: systemImage)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(Palette.accent)
+            .frame(width: 24)
+        Text(text)
+            .font(.rcCallout)
+            .foregroundStyle(Palette.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

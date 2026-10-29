@@ -164,6 +164,16 @@ final class ScreenshotTests: XCTestCase {
                 Card(padding: Spacing.xl) { TrackingUnavailableNotice() }
             }
         }
+        let fromAndroid = myRows().map { day in
+            day.platform == .tiktok
+                ? PlatformDay(platform: .tiktok, date: day.date, metric: .counted(count: (day.metric.reelCount ?? 0) + 7, appTimeMs: day.metric.appTimeMs ?? 0))
+                : day
+        }
+        try snapshot("12-free-edition-figures", height: 1_560) {
+            screen(title: "Good evening, Avi") {
+                TodayDashboard(rows: fromAndroid, today: today, footnote: TodayDashboard.accountFootnote)
+            }
+        }
     }
 
     // MARK: Rendering

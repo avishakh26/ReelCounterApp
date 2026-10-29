@@ -37,6 +37,16 @@ xcodegen generate
 open ReelCounter.xcodeproj
 ```
 
+## Free edition (no paid Apple account)
+
+Target `ReelCounterFree` (bundle id `com.reelcounter.app.free`, Swift flag `FREE_EDITION`) is the same
+app without Screen Time: free Apple accounts can't use the Family Controls capability. It has sign-in,
+profile, friends, requests, suggestions, friends' figures and privacy; Today/Insights explain that this
+iPhone isn't measured. CI job "Free edition (.ipa)" builds it unsigned and attaches
+`ReelCounter-free.ipa` to the run (download from the run page while signed in to GitHub). It needs the
+repository secrets `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`, else the app says "backend not
+configured". Install from Windows with Sideloadly and a free Apple ID; it must be reinstalled every 7 days.
+
 ## Before it can run on iPhones
 
 1. **Apple Developer Program** ($99/year), needed for TestFlight and the App Store.

@@ -170,6 +170,11 @@ Developer account yet**. Everything is in `ios/` (see `ios/README.md`), develope
   simulator (windows must use the host app's `UIWindowScene`, else images are blank) and force-pushes the
   PNGs to branch `ios-screenshots`; fetch them from raw.githubusercontent.com. Fixtures are test-only;
   `seedForScreenshots` hooks in FriendsStore/SessionStore are `#if DEBUG`. All 10 screens reviewed light/dark.
+- **Free edition** (user has no paid account): target `ReelCounterFree`, flag `FREE_EDITION`, no
+  entitlements/extension; `TrackingStore.Status.unavailable` + `TrackingUnavailableNotice`. CI job
+  "Free edition (.ipa)" uploads artifact `ReelCounter-free-ipa` (private to signed-in users). Publishing it as a
+  public GitHub release was blocked by the permission check: ask the user before making it public.
+  Needs repo secrets `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (user adds them). Sideloadly + free Apple ID, 7-day expiry.
 - Also on this branch: `gradlew` marked executable (Android CI on `main` failed with exit 126 without it),
   and Android **Delete account** (Settings → Account; `AuthRepository.deleteAccount` → avatar files, then
   `delete_my_account` RPC; Google Play requires it). DB tests for it in `supabase/tests/pglite/run.mjs`
