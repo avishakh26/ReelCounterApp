@@ -15,6 +15,15 @@
     <string name="feature_settings_edit_profile">Edit</string>
     <string name="feature_settings_sign_out">Sign out</string>
     <string name="feature_settings_sign_out_title">Sign out?</string>
+    <string name="feature_settings_delete_account">Delete account</string>
+    <string name="feature_settings_deleting">Deleting account…</string>
+    <string name="feature_settings_delete_title">Delete your account?</string>
+    <string name="feature_settings_delete_message">Your profile, photo, friends and all saved figures are permanently deleted, on Android and iPhone. This can\'t be undone.</string>
+    <string name="feature_settings_delete_confirm">Delete account</string>
+    <string name="feature_settings_delete_failed_title">Account not deleted</string>
+    <string name="feature_settings_delete_failed_offline">Can\'t reach ReelCounter. Check your connection and try again.</string>
+    <string name="feature_settings_delete_failed">Something went wrong, so nothing was deleted. Please try again.</string>
+    <string name="feature_settings_ok">OK</string>
     <string name="feature_settings_sign_out_message">You can sign back in any time with your email and password.</string>
     <string name="feature_settings_cancel">Cancel</string>
 

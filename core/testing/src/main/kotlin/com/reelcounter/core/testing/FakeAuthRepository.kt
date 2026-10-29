@@ -41,6 +41,12 @@ class FakeAuthRepository(initialState: AuthState = AuthState.SignedOut) : AuthRe
         state.value = AuthState.SignedOut
     }
 
+    override suspend fun deleteAccount(): Outcome<Unit, AuthError> {
+        val outcome = record("deleteAccount")
+        if (outcome is Outcome.Success) state.value = AuthState.SignedOut
+        return outcome
+    }
+
     private fun record(call: String): Outcome<Unit, AuthError> {
         calls += call
         return result

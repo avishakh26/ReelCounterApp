@@ -62,6 +62,11 @@ internal class FakeAuthRemoteDataSource : AuthRemoteDataSource {
         sessionStatus.value = RemoteSessionStatus.SignedOut
         record("signOut")
     }
+
+    override suspend fun deleteAccount() {
+        record("deleteAccount")
+        sessionStatus.value = RemoteSessionStatus.SignedOut
+    }
 }
 
 internal class FakePasswordResetFlag(private val log: MutableList<String>? = null) : PasswordResetFlag {

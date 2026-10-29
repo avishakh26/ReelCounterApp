@@ -176,8 +176,14 @@ final class ScreenshotTests: XCTestCase {
     /// Hosts the view in a real window (so UIKit-backed controls render) and saves light and dark PNGs.
     private func snapshot<V: View>(_ name: String, height: CGFloat, @ViewBuilder view: () -> V) throws {
         try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
+        // Since iOS 13 a window is only drawn when it belongs to a scene: use the host app's.
+        let scene = try XCTUnwrap(
+            UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+            "The test host app has no window scene"
+        )
         for style in [UIUserInterfaceStyle.light, .dark] {
-            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: width, height: height))
+            let window = UIWindow(windowScene: scene)
+            window.frame = CGRect(x: 0, y: 0, width: width, height: height)
             window.overrideUserInterfaceStyle = style
             window.rootViewController = UIHostingController(rootView: view().tint(Palette.accent))
             window.makeKeyAndVisible()

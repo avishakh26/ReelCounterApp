@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material.icons.rounded.CloudOff
@@ -94,6 +95,7 @@ object RcIcons {
     val HidePassword: ImageVector = Icons.Rounded.VisibilityOff
     val ChangePhoto: ImageVector = Icons.Rounded.PhotoCamera
     val SignOut: ImageVector = Icons.AutoMirrored.Rounded.Logout
+    val Delete: ImageVector = Icons.Rounded.Delete
     val EmailCode: ImageVector = Icons.Rounded.MarkEmailRead
 
     // Social and privacy

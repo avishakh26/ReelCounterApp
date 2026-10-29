@@ -91,4 +91,25 @@ class DefaultAuthRepositoryTest {
         assertEquals(AuthState.SignedOut, repo.authState.value)
         assertEquals(false, flag.isPending.value)
     }
+
+    @Test
+    fun `deleting the account signs out`() = runTest(UnconfinedTestDispatcher()) {
+        val repo = repository()
+        repo.signIn("sam@example.com", "password1")
+
+        assertEquals(Outcome.Success(Unit), repo.deleteAccount())
+
+        assertEquals(AuthState.SignedOut, repo.authState.value)
+        assertEquals("deleteAccount", remote.calls.last())
+    }
+
+    @Test
+    fun `a failed deletion offline keeps the user signed in and reports it`() = runTest(UnconfinedTestDispatcher()) {
+        val repo = repository()
+        repo.signIn("sam@example.com", "password1")
+        remote.failure = RemoteException(RemoteException.Kind.Network)
+
+        assertEquals(Outcome.Failure(AuthError.Network), repo.deleteAccount())
+        assertEquals(AuthState.SignedIn("user-1", "sam@example.com"), repo.authState.value)
+    }
 }

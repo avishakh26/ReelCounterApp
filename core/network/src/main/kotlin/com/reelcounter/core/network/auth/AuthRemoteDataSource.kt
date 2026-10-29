@@ -24,6 +24,9 @@ interface AuthRemoteDataSource {
     suspend fun updatePassword(newPassword: String)
 
     suspend fun signOut()
+
+    /** Deletes the signed-in account on the server (profile photos first), then clears the local session. */
+    suspend fun deleteAccount()
 }
 
 sealed interface RemoteSessionStatus {

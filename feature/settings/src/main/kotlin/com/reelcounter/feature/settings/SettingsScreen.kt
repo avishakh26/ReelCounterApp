@@ -36,6 +36,7 @@ import com.reelcounter.core.designsystem.component.RcScreenHeader
 import com.reelcounter.core.designsystem.component.RcSectionHeader
 import com.reelcounter.core.designsystem.icon.RcIcons
 import com.reelcounter.core.designsystem.theme.Spacing
+import com.reelcounter.core.domain.auth.AuthError
 import com.reelcounter.core.model.UserProfile
 import com.reelcounter.core.ui.profile.Avatar
 
@@ -49,8 +50,12 @@ internal fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val profile by viewModel.profile.collectAsStateWithLifecycle()
+    val deletion by viewModel.deletion.collectAsStateWithLifecycle()
     SettingsScreen(
         profile = profile,
+        deletion = deletion,
+        onDeleteAccount = viewModel::deleteAccount,
+        onDismissDeletionError = viewModel::dismissDeletionError,
         onEditProfileClick = onEditProfileClick,
         onTrackingClick = onTrackingClick,
         onPrivacyClick = onPrivacyClick,
@@ -60,10 +65,13 @@ internal fun SettingsScreen(
     )
 }
 
-// Data export and account deletion join this list in Phase 8.
+// Data export joins this list in Phase 8.
 @Composable
 internal fun SettingsScreen(
     profile: UserProfile?,
+    deletion: AccountDeletion,
+    onDeleteAccount: () -> Unit,
+    onDismissDeletionError: () -> Unit,
     onEditProfileClick: () -> Unit,
     onTrackingClick: () -> Unit,
     onPrivacyClick: () -> Unit,
@@ -72,6 +80,7 @@ internal fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     var confirmSignOut by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(modifier = modifier) { innerPadding ->
         Box(
@@ -129,6 +138,16 @@ internal fun SettingsScreen(
                         showChevron = false,
                         onClick = { confirmSignOut = true },
                     )
+                    RcListRow(
+                        title = stringResource(
+                            if (deletion == AccountDeletion.Deleting) R.string.feature_settings_deleting else R.string.feature_settings_delete_account,
+                        ),
+                        icon = RcIcons.Delete,
+                        isDestructive = true,
+                        showChevron = false,
+                        enabled = deletion != AccountDeletion.Deleting,
+                        onClick = { confirmDelete = true },
+                    )
                 }
             }
         }
@@ -146,6 +165,34 @@ internal fun SettingsScreen(
                 onSignOut()
             },
             onDismiss = { confirmSignOut = false },
+        )
+    }
+
+    if (confirmDelete) {
+        RcAlertDialog(
+            title = stringResource(R.string.feature_settings_delete_title),
+            text = stringResource(R.string.feature_settings_delete_message),
+            confirmText = stringResource(R.string.feature_settings_delete_confirm),
+            dismissText = stringResource(R.string.feature_settings_cancel),
+            icon = RcIcons.Delete,
+            isDestructive = true,
+            onConfirm = {
+                confirmDelete = false
+                onDeleteAccount()
+            },
+            onDismiss = { confirmDelete = false },
+        )
+    }
+
+    if (deletion is AccountDeletion.Failed) {
+        RcAlertDialog(
+            title = stringResource(R.string.feature_settings_delete_failed_title),
+            text = stringResource(
+                if (deletion.error == AuthError.Network) R.string.feature_settings_delete_failed_offline else R.string.feature_settings_delete_failed,
+            ),
+            confirmText = stringResource(R.string.feature_settings_ok),
+            onConfirm = onDismissDeletionError,
+            onDismiss = onDismissDeletionError,
         )
     }
 }
