@@ -1,0 +1,11 @@
+// Committed placeholders. With these the app builds and shows "backend not configured".
+// Real values go in Secrets.xcconfig next to this file (git-ignored; copy Secrets.example.xcconfig).
+//
+// SUPABASE_PUBLISHABLE_KEY is the client key ("Publishable key"). NEVER use the secret /
+// service_role key: it bypasses row level security.
+//
+// xcconfig treats "//" as a comment, so URLs are written with $() between the slashes.
+SUPABASE_URL = https:/$()/unconfigured.invalid
+SUPABASE_PUBLISHABLE_KEY = unconfigured
+
+#include? "Secrets.xcconfig"

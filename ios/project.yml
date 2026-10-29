@@ -1,0 +1,97 @@
+# XcodeGen project definition. Generate the Xcode project on a Mac with:
+#   brew install xcodegen && cd ios && xcodegen generate
+# The generated ReelCounter.xcodeproj is not committed.
+name: ReelCounter
+
+options:
+  bundleIdPrefix: com.reelcounter
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+configFiles:
+  Debug: Config/App.xcconfig
+  Release: Config/App.xcconfig
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+  ReelCounterCore:
+    path: ReelCounterCore
+
+targets:
+  ReelCounter:
+    type: application
+    platform: iOS
+    sources:
+      - path: ReelCounter
+    dependencies:
+      - package: Supabase
+        product: Supabase
+      - package: ReelCounterCore
+      - target: ReelCounterMonitor
+    entitlements:
+      path: ReelCounter/ReelCounter.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.reelcounter.app
+    info:
+      path: ReelCounter/Info.plist
+      properties:
+        CFBundleDisplayName: ReelCounter
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.reelcounter.app.sync
+        ITSAppUsesNonExemptEncryption: false
+        SUPABASE_URL: $(SUPABASE_URL)
+        SUPABASE_PUBLISHABLE_KEY: $(SUPABASE_PUBLISHABLE_KEY)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.reelcounter.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  # Screen Time calls this extension when a picked app reaches a usage threshold.
+  ReelCounterMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ReelCounterMonitor
+    dependencies:
+      - package: ReelCounterCore
+    entitlements:
+      path: ReelCounterMonitor/ReelCounterMonitor.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.reelcounter.app
+    info:
+      path: ReelCounterMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: ReelCounter Monitor
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).UsageMonitor
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.reelcounter.app.monitor
+
+schemes:
+  ReelCounter:
+    build:
+      targets:
+        ReelCounter: all

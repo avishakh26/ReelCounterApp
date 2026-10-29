@@ -35,3 +35,11 @@ bin/
 
 # Local-only test logins
 *.local.txt
+
+# iOS: generated project, build output and local secrets
+ios/ReelCounter.xcodeproj/
+ios/Config/Secrets.xcconfig
+ios/**/.build/
+ios/**/.swiftpm/
+DerivedData/
+xcuserdata/
