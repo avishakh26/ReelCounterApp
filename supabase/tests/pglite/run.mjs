@@ -455,6 +455,26 @@ await db.query('delete from auth.users where id = $1', [ALICE]);
   report(p.rows[0].n === 0 && s.rows[0].n === 0, 'deleting the auth user removes profile and settings');
 }
 
+// ── Deleting your own account from the app ────────────────────────────
+console.log('\ndelete_my_account');
+const JUNO = '00000000-0000-4000-8000-0000000000a7';
+await db.query(`insert into auth.users (id, email) values ($1, 'juno@example.com')`, [JUNO]);
+await expectError('signed-out callers cannot delete accounts', null, 'select public.delete_my_account()', [], '42501');
+{
+  const before = await db.query('select count(*)::int as n from auth.users');
+  try {
+    await as(JUNO, () => db.query('select public.delete_my_account()'));
+    report(true, 'a signed-in user can delete their account');
+  } catch (e) {
+    report(false, 'a signed-in user can delete their account', `${e.code}: ${e.message}`);
+  }
+  const after = await db.query('select count(*)::int as n from auth.users');
+  const juno = await db.query('select count(*)::int as n from auth.users where id = $1', [JUNO]);
+  const profile = await db.query('select count(*)::int as n from public.profiles where id = $1', [JUNO]);
+  report(juno.rows[0].n === 0 && profile.rows[0].n === 0, 'their auth user and profile are gone');
+  report(after.rows[0].n === before.rows[0].n - 1, 'and nobody else was deleted');
+}
+
 console.log(`\n${passes} passed, ${failures} failed`);
 await db.close();
 process.exit(failures === 0 ? 0 : 1);
