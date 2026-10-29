@@ -21,6 +21,8 @@ data class TrackingSettingsUiState(
     val platforms: List<PlatformConfiguration> = emptyList(),
     /** Whether the reel-counting accessibility service is on (exact counts) or not (estimates). */
     val countingEnabled: Boolean = false,
+    /** This build includes reel counting; the Reel counting card is hidden without it. */
+    val countingAvailable: Boolean = true,
 )
 
 @HiltViewModel
@@ -32,7 +34,13 @@ class TrackingSettingsViewModel @Inject constructor(
 
     val uiState: StateFlow<TrackingSettingsUiState> =
         combine(trackingRepository.status, platformSettings.platforms, countingStatus.isEnabled) { status, platforms, counting ->
-            TrackingSettingsUiState(isLoading = false, status = status, platforms = platforms, countingEnabled = counting)
+            TrackingSettingsUiState(
+                isLoading = false,
+                status = status,
+                platforms = platforms,
+                countingEnabled = counting,
+                countingAvailable = countingStatus.isAvailable,
+            )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TrackingSettingsUiState())
 
     fun setPaused(paused: Boolean) = launch { trackingRepository.setPaused(paused) }

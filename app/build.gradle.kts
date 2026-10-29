@@ -62,3 +62,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.navigation.compose)
 }
+
+// `-PreelCounting=false` leaves out the reel-counting accessibility service. Play Protect blocks
+// APKs installed from a file that declare one, so the APK given to testers is built this way.
+if (providers.gradleProperty("reelCounting").orNull == "false") {
+    androidComponents {
+        onVariants { variant ->
+            variant.sources.manifests.addStaticManifestFile("src/withoutCounting/AndroidManifest.xml")
+        }
+    }
+}

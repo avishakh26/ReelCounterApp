@@ -117,10 +117,10 @@ internal fun TrackingSetupScreen(
                     .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg),
             ) {
-                uiState.step?.let { step -> StepIndicator(step) }
+                uiState.step?.let { step -> StepIndicator(step, uiState.countingAvailable) }
                 when (uiState.step) {
                     null, SetupStep.Done -> RcLoadingIndicator(modifier = Modifier.fillMaxWidth())
-                    SetupStep.Disclosure -> DisclosureStep(uiState.isWorking, onAcceptDisclosure, onDecline)
+                    SetupStep.Disclosure -> DisclosureStep(uiState.isWorking, uiState.countingAvailable, onAcceptDisclosure, onDecline)
                     SetupStep.ChooseApps -> ChooseAppsStep(uiState, onToggle, onConfirmApps)
                     SetupStep.GrantAccess -> GrantAccessStep(uiState.isWorking, onOpenSettings)
                     SetupStep.CountReels -> CountReelsStep(onOpenAccessibility, onOpenAppInfo, onSkipCounting)
@@ -136,7 +136,12 @@ internal fun TrackingSetupScreen(
  * updating this text AND bumping CURRENT_DISCLOSURE_VERSION, so everyone sees it again.
  */
 @Composable
-private fun ColumnScope.DisclosureStep(isWorking: Boolean, onAccept: () -> Unit, onDecline: () -> Unit) {
+private fun ColumnScope.DisclosureStep(
+    isWorking: Boolean,
+    countingAvailable: Boolean,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit,
+) {
     StepHeading(stringResource(R.string.feature_tracking_disclosure_title))
     Text(
         text = stringResource(R.string.feature_tracking_disclosure_intro),
@@ -145,11 +150,12 @@ private fun ColumnScope.DisclosureStep(isWorking: Boolean, onAccept: () -> Unit,
     )
     RcCard(modifier = Modifier.fillMaxWidth(), mergeSemantics = false) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.lg)) {
-            listOf(
+            listOfNotNull(
                 RcIcons.AppTime to R.string.feature_tracking_disclosure_collects,
                 RcIcons.Unavailable to R.string.feature_tracking_disclosure_not_collected,
                 RcIcons.Block to R.string.feature_tracking_disclosure_other_apps,
-                RcIcons.Reels to R.string.feature_tracking_disclosure_counting,
+                // Only builds that include the accessibility service can count reels.
+                (RcIcons.Reels to R.string.feature_tracking_disclosure_counting).takeIf { countingAvailable },
                 RcIcons.Synced to R.string.feature_tracking_disclosure_storage,
                 RcIcons.Friends to R.string.feature_tracking_disclosure_sharing,
                 RcIcons.Estimated to R.string.feature_tracking_disclosure_estimates,
@@ -312,8 +318,13 @@ private fun ColumnScope.CountReelsStep(onOpenAccessibility: () -> Unit, onOpenAp
 
 /** "Step 1 of 4" with a segmented progress line. */
 @Composable
-private fun StepIndicator(step: SetupStep) {
-    val steps = listOf(SetupStep.Disclosure, SetupStep.ChooseApps, SetupStep.GrantAccess, SetupStep.CountReels)
+private fun StepIndicator(step: SetupStep, countingAvailable: Boolean) {
+    val steps = listOfNotNull(
+        SetupStep.Disclosure,
+        SetupStep.ChooseApps,
+        SetupStep.GrantAccess,
+        SetupStep.CountReels.takeIf { countingAvailable },
+    )
     val current = steps.indexOf(step)
     if (current < 0) return
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {

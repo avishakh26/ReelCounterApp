@@ -19,6 +19,12 @@ interface ReelCountingRecorder {
 
 /** Whether the user has turned on ReelCounter's reel-counting accessibility service. */
 interface ReelCountingStatus {
+    /**
+     * False when this build leaves the accessibility service out (`-PreelCounting=false`), so the
+     * app installs from a file without Play Protect blocking it. Counting screens are hidden then.
+     */
+    val isAvailable: Boolean
+
     val isEnabled: Flow<Boolean>
 
     fun isEnabledNow(): Boolean

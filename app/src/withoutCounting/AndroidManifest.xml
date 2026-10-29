@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Merged only when building with -PreelCounting=false (see app/build.gradle.kts). Removes the
+    reel-counting accessibility service, so an APK installed from a file isn't blocked by Play
+    Protect. The app hides its counting screens when the service is missing and estimates instead.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <service
+            android:name="com.reelcounter.core.tracking.counting.ReelAccessibilityService"
+            tools:node="remove" />
+    </application>
+
+</manifest>

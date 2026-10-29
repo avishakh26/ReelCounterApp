@@ -77,7 +77,12 @@ The build refuses secret/service_role keys and allows plain http only for localh
 ```
 Last full run: build OK, 105/105 unit tests pass, lint 0 issues (before the friends work below).
 APK: `app/build/outputs/apk/debug/app-debug.apk`; the copy given to the user is `ReelCounter.apk`
-(built against the hosted project). Install: `adb -s emulator-5554 install -r <apk>`.
+(built against the hosted project).
+**Build the user's APK with `./gradlew assembleDebug -PreelCounting=false`.** That merges
+`app/src/withoutCounting/AndroidManifest.xml`, which removes the reel-counting accessibility service:
+the user's phone (Play Protect) refused to install the APK that declares it. `ReelCountingStatus.isAvailable`
+is then false and the app skips the CountReels setup step, the disclosure bullet and the Reel counting card,
+falling back to estimates. Verify with `aapt2 dump xmltree <apk> --file AndroidManifest.xml | grep -ci accessibility` → 0. Install: `adb -s emulator-5554 install -r <apk>`.
 Screenshots: `adb exec-out screencap -p > file.png`. Tap by text: `uiautomator dump` then parse bounds.
 
 ## 6. UI redesign (done)

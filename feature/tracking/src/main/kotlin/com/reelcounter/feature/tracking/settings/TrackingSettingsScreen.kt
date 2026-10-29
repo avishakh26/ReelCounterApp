@@ -120,7 +120,8 @@ internal fun TrackingSettingsScreen(uiState: TrackingSettingsUiState, actions: T
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 StatusSection(uiState.status, actions)
-                if (uiState.status == TrackingStatus.Active || uiState.status == TrackingStatus.Paused) {
+                val isTracking = uiState.status == TrackingStatus.Active || uiState.status == TrackingStatus.Paused
+                if (uiState.countingAvailable && isTracking) {
                     CountingCard(uiState.countingEnabled, actions.onOpenAccessibility)
                 }
                 RcSectionHeader(

@@ -112,6 +112,18 @@ class TrackingSetupViewModelTest {
     }
 
     @Test
+    fun `a build without the counting service finishes right after usage access`() {
+        val viewModel = TrackingSetupViewModel(tracking, platforms, FakeReelCountingStatus(isAvailable = false))
+        assertFalse(viewModel.uiState.value.countingAvailable)
+        viewModel.acceptDisclosure()
+        viewModel.confirmApps()
+
+        tracking.statusFlow.value = TrackingStatus.Active
+
+        assertEquals(SetupStep.Done, viewModel.uiState.value.step)
+    }
+
+    @Test
     fun `reel counting can be skipped, keeping estimates`() {
         counting.enabled.value = false
         val viewModel = viewModel()

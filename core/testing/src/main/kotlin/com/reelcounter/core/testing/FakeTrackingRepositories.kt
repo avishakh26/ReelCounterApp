@@ -83,7 +83,7 @@ class FakeCurrentDateProvider(initial: LocalDate) : CurrentDateProvider {
     override val today: Flow<LocalDate> = date
 }
 
-class FakeReelCountingStatus(enabled: Boolean = false) : ReelCountingStatus {
+class FakeReelCountingStatus(enabled: Boolean = false, override val isAvailable: Boolean = true) : ReelCountingStatus {
     val enabled = MutableStateFlow(enabled)
     override val isEnabled: Flow<Boolean> = this.enabled
     override fun isEnabledNow(): Boolean = enabled.value

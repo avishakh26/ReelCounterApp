@@ -26,6 +26,8 @@ data class TrackingSetupUiState(
     val step: SetupStep? = null,
     val choices: List<PlatformChoice> = emptyList(),
     val isWorking: Boolean = false,
+    /** This build includes reel counting; without it the CountReels step is skipped. */
+    val countingAvailable: Boolean = true,
 ) {
     val canContinueFromApps: Boolean get() = choices.any { it.selected } && !isWorking
 }
@@ -43,7 +45,7 @@ class TrackingSetupViewModel @Inject constructor(
     private val countingStatus: ReelCountingStatus,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TrackingSetupUiState())
+    private val _uiState = MutableStateFlow(TrackingSetupUiState(countingAvailable = countingStatus.isAvailable))
     val uiState: StateFlow<TrackingSetupUiState> = _uiState.asStateFlow()
 
     init {
@@ -114,7 +116,7 @@ class TrackingSetupViewModel @Inject constructor(
         viewModelScope.launch {
             // First read straight away, so Today has numbers when the user lands there.
             trackingRepository.refresh()
-            val next = if (countingStatus.isEnabledNow()) SetupStep.Done else SetupStep.CountReels
+            val next = if (!countingStatus.isAvailable || countingStatus.isEnabledNow()) SetupStep.Done else SetupStep.CountReels
             _uiState.update { it.copy(isWorking = false, step = next) }
         }
     }
