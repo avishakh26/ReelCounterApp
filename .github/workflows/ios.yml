@@ -1,6 +1,8 @@
 name: iOS
 
 on:
+  # "Run workflow" on the Actions tab rebuilds everything, e.g. the free .ipa after changing secrets.
+  workflow_dispatch:
   push:
     branches: [main, ios-app]
     paths: ['ios/**', '.github/workflows/ios.yml']
