@@ -227,7 +227,8 @@ internal class UsageIngestor @Inject constructor(
         const val OVERLAP_MS = 10 * 60_000L
 
         /** On the very first read, also fill in yesterday from the system log. */
-        const val BACKFILL_DAYS = 1L
+        // Android keeps roughly the last week of usage events; older days come back empty.
+        const val BACKFILL_DAYS = 6L
 
         /** Assumed minimum time the system keeps raw events (unverified; spike S1 measures it). */
         const val RETENTION_ASSUMPTION_MS = 3 * 24 * 3_600_000L

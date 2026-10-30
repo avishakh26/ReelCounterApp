@@ -13,6 +13,9 @@ interface ActivityRemoteDataSource {
      * with the higher revision, so retries and out-of-order uploads are safe.
      */
     suspend fun upsertDailySummaries(rows: List<NetworkDailySummary>)
+
+    /** The (date, platform) pairs on [dates] that [userId] has rows for from devices other than [deviceId]. */
+    suspend fun daysFromOtherDevices(userId: String, deviceId: String, dates: Collection<String>): Set<Pair<String, String>>
 }
 
 /**

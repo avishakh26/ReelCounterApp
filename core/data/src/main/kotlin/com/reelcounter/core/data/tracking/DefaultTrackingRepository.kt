@@ -32,6 +32,7 @@ internal class DefaultTrackingRepository @Inject constructor(
     private val installedApps: InstalledApps,
     private val time: TimeSource,
     private val syncScheduler: SyncScheduler,
+    private val accountHistory: AccountHistory,
 ) : TrackingRepository {
 
     override val status: Flow<TrackingStatus> = combine(preferences.preferences, usageAccess.isGranted) { prefs, granted ->
@@ -50,7 +51,12 @@ internal class DefaultTrackingRepository @Inject constructor(
         store.observeDay(date),
         store.observePlatformSettings(),
         status,
-    ) { rows, settings, status ->
+        accountHistory.days,
+    ) { rows, settings, status, history ->
+        // A day this install didn't record (before it was installed, or past the phone's usage
+        // history) shows what the account has for it, e.g. from before a reinstall.
+        val saved = history[date]
+        if (rows.isEmpty() && !saved.isNullOrEmpty()) return@combine saved
         val rowsByPlatform = rows.associateBy { it.platformId }
         val settingsById = settings.associateBy { it.platformId }
         PlatformCatalog.all
@@ -75,6 +81,7 @@ internal class DefaultTrackingRepository @Inject constructor(
     override suspend fun refresh(): RefreshResult = ingestor.ingest().also { result ->
         // Upload whatever changed. The sync itself checks sign-in and consent, and waits for a network.
         if (result == RefreshResult.Updated) syncScheduler.requestSync()
+        accountHistory.refresh()
     }
 
     override suspend fun acceptDisclosure(version: Int) = preferences.acceptDisclosure(version, time.nowMs())

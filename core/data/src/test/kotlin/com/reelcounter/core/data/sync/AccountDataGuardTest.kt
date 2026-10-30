@@ -1,10 +1,12 @@
 package com.reelcounter.core.data.sync
 
 import com.reelcounter.core.data.tracking.DailyRow
+import com.reelcounter.core.data.tracking.FakeDeviceIds
 import com.reelcounter.core.data.tracking.FakeSyncPreferences
 import com.reelcounter.core.data.tracking.FakeTimeSource
 import com.reelcounter.core.data.tracking.FakeTrackingLocalStore
 import com.reelcounter.core.data.tracking.FakeTrackingPreferences
+import com.reelcounter.core.datastore.SyncState
 import com.reelcounter.core.datastore.TrackingPreferences
 import com.reelcounter.core.domain.auth.AuthState
 import com.reelcounter.core.model.MetricQuality
@@ -32,6 +34,7 @@ class AccountDataGuardTest {
         store = store,
         syncScheduler = { syncRequests++ },
         time = FakeTimeSource(nowMs = 5_000, zone = ZoneId.of("UTC")),
+        deviceIds = FakeDeviceIds(),
         scope = backgroundScope,
     )
 
@@ -65,6 +68,18 @@ class AccountDataGuardTest {
 
         assertEquals(1, store.rows.value.size)
         assertEquals(device, sync.current.value.deviceId)
+    }
+
+    @Test
+    fun `after a reinstall the account gets the same device id again`() = runTest {
+        guard().onSignedIn("alice")
+        val first = sync.current.value.deviceId
+        sync.current.value = SyncState() // a reinstall wipes the app's own storage
+
+        guard().onSignedIn("alice")
+
+        assertEquals(first, sync.current.value.deviceId, "so its uploads replace the earlier ones")
+        assertEquals("1970-01-01", sync.current.value.coverageStartDate)
     }
 
     @Test

@@ -1,12 +1,14 @@
 package com.reelcounter.core.tracking.di
 
 import com.reelcounter.core.domain.tracking.CurrentDateProvider
+import com.reelcounter.core.domain.tracking.DeviceIdProvider
 import com.reelcounter.core.domain.tracking.InstalledApps
 import com.reelcounter.core.domain.tracking.ReelCountingStatus
 import com.reelcounter.core.domain.tracking.TimeSource
 import com.reelcounter.core.domain.tracking.UsageAccessMonitor
 import com.reelcounter.core.domain.tracking.UsageEventSource
 import com.reelcounter.core.tracking.AndroidCurrentDateProvider
+import com.reelcounter.core.tracking.AndroidDeviceIdProvider
 import com.reelcounter.core.tracking.AppOpsUsageAccessMonitor
 import com.reelcounter.core.tracking.PackageManagerInstalledApps
 import com.reelcounter.core.tracking.SystemTimeSource
@@ -25,6 +27,8 @@ internal abstract class TrackingModule {
     @Binds abstract fun bindUsageAccessMonitor(impl: AppOpsUsageAccessMonitor): UsageAccessMonitor
 
     @Binds abstract fun bindInstalledApps(impl: PackageManagerInstalledApps): InstalledApps
+
+    @Binds abstract fun bindDeviceIdProvider(impl: AndroidDeviceIdProvider): DeviceIdProvider
 
     @Binds abstract fun bindTimeSource(impl: SystemTimeSource): TimeSource
 

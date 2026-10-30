@@ -45,6 +45,7 @@
 
     <!-- Platforms -->
     <string name="feature_today_by_app_title">By app</string>
+    <string name="feature_today_by_app_on_day">By app on %1$s</string>
 
     <string name="feature_today_updated_at">Updated %1$s · pull down to refresh</string>
     <string name="feature_today_not_updated">Not updated yet · pull down to refresh</string>

@@ -202,7 +202,28 @@ QA on the emulator (local backend, two accounts) plus probing the hosted project
   longer promises an emailed code; "about 1 reel" plurals in chart labels.
 - Android: 170 unit tests pass with -PwarningsAsErrors=true; DB tests 144 pass.
 
-## 11. Other files made for the user
+## 11. History and week charts (2026-10-31, branch `ios-app`)
+
+User: previous days' reels weren't visible (only today, "1 of 7 days with data"). Causes and fixes:
+- `UsageIngestor.BACKFILL_DAYS` 1 → 6: a first read (fresh install) reads the past week of Android usage
+  history. Disclosure text says "past week"; `CURRENT_DISCLOSURE_VERSION` 3 → 4 (everyone re-accepts).
+- Stable device id per phone + account: `DeviceIdProvider` (core:domain) → `AndroidDeviceIdProvider`
+  (core:tracking): UUID.nameUUIDFromBytes("reelcounter-device:" + ANDROID_ID + ":" + userId), random if no
+  ANDROID_ID. A reinstall upserts over its earlier rows instead of adding a second device (friends saw sums).
+  `SyncPreferencesStore.adoptOwner/switchOwner(userId, deviceId, coverageStartDate)`.
+- `SyncState.coverageStartDate` (day this install began): `ActivitySyncer` skips uploading read-back days
+  (before it) that the server already has from another device id (`daysFromOtherDevices`), so rows from
+  installs before this change aren't doubled. Days since the install are always uploaded.
+- `AccountHistory` (core:data): own `daily_activity_totals` for 14 days, refreshed with
+  `TrackingRepository.refresh()`; `observeDay` shows them for days with no local rows (local always wins).
+- `RcBarChart`: a number over every bar with data; `selectedIndex`/`onBarClick`. `DayDetail` (core/ui)
+  shows a picked day's reels/range/app time under the chart on Today, Insights and friend pages. Today's
+  "By app" switches to the picked day ("By app on Thursday"; `TodayUiState.Content.weekActivities`).
+- Emulator note: with Docker + Gradle running the AVD ran out of RAM (heavy swap) and showed spurious
+  "isn't responding" dialogs on 15–20 s cold starts; `adb reboot` fixed it. Not an app bug.
+- 173 unit tests pass with -PwarningsAsErrors=true.
+
+## 12. Other files made for the user
 
 - `MANUAL_TEST_CHECKLIST.md`: 67 manual QA cases (written before the redesign; screens changed since).
 - `hosted-setup.sql`: the first 3 migrations combined for the hosted SQL Editor.

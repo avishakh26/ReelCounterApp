@@ -23,7 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,9 +56,10 @@ import com.reelcounter.core.designsystem.icon.RcIcons
 import com.reelcounter.core.designsystem.theme.Spacing
 import com.reelcounter.core.domain.tracking.TrackingStatus
 import com.reelcounter.core.model.UserProfile
+import com.reelcounter.core.ui.metric.DayDetail
 import com.reelcounter.core.ui.metric.DaySummary
-import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.PlatformActivityRow
+import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.formatAppTime
 import com.reelcounter.core.ui.metric.formatCompactAppTime
 import com.reelcounter.core.ui.metric.formatCount
@@ -132,6 +136,9 @@ private fun TodayContent(
     onOpenInsights: () -> Unit,
     onOpenProfile: () -> Unit,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
+    // The day picked in the week chart (index into state.week); null means today. Reset at midnight.
+    var selectedDay by rememberSaveable(state.date) { mutableStateOf<Int?>(null) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.xxl),
@@ -153,11 +160,22 @@ private fun TodayContent(
                     .padding(top = Spacing.md),
             )
         }
-        item(key = "week") { WeekCard(state.week) }
-        if (state.activities.isNotEmpty()) {
+        item(key = "week") {
+            WeekCard(
+                week = state.week,
+                selectedIndex = selectedDay,
+                onSelectDay = { index -> selectedDay = index.takeUnless { it == state.week.lastIndex || it == selectedDay } },
+            )
+        }
+        // A day picked in the chart shows its own apps; otherwise today's.
+        val pickedDay = selectedDay?.let { state.week.getOrNull(it) }
+        val appActivities = selectedDay?.let { state.weekActivities.getOrNull(it) } ?: state.activities
+        if (appActivities.isNotEmpty()) {
             item(key = "apps-header") {
                 RcSectionHeader(
-                    title = stringResource(R.string.feature_today_by_app_title),
+                    title = pickedDay?.let { day ->
+                        stringResource(R.string.feature_today_by_app_on_day, day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale))
+                    } ?: stringResource(R.string.feature_today_by_app_title),
                     modifier = Modifier
                         .widthIn(max = ContentMaxWidth)
                         .padding(top = Spacing.md),
@@ -165,7 +183,7 @@ private fun TodayContent(
             }
             item(key = "apps") {
                 RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
-                    state.activities.forEachIndexed { index, activity ->
+                    appActivities.forEachIndexed { index, activity ->
                         if (index > 0) RcDivider(startInset = 68.dp)
                         PlatformActivityRow(activity = activity)
                     }
@@ -408,9 +426,12 @@ private fun TrackingStatusPill(status: TrackingStatus) {
     }
 }
 
-/** The last seven days as bars: reel counts when any day has one, otherwise app time. */
+/**
+ * The last seven days as bars: reels when any day has a count, otherwise app time. Tapping a day
+ * shows its figures under the chart (and its apps below the card).
+ */
 @Composable
-private fun WeekCard(week: List<DaySummary>) {
+private fun WeekCard(week: List<DaySummary>, selectedIndex: Int?, onSelectDay: (Int) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val useCounts = week.any { it.count != null }
     val anyEstimate = week.any { it.isEstimate }
@@ -446,14 +467,24 @@ private fun WeekCard(week: List<DaySummary>) {
             }
             RcBar(label = dayName, value = value, valueLabel = valueLabel, description = description, highlighted = isToday)
         }
-        RcBarChart(bars = bars, modifier = Modifier.padding(top = Spacing.xs))
+        RcBarChart(
+            bars = bars,
+            modifier = Modifier.padding(top = Spacing.xs),
+            selectedIndex = selectedIndex,
+            onBarClick = onSelectDay,
+        )
+        val picked = selectedIndex?.let { week.getOrNull(it) }
+        if (picked != null) {
+            DayDetail(day = picked, modifier = Modifier.padding(top = Spacing.md))
+        }
 
         Text(
             text = if (daysWithData == 0) {
                 stringResource(R.string.feature_today_week_empty)
             } else {
                 weekSummary(week, useCounts, anyEstimate) + " · " +
-                    stringResource(R.string.feature_today_week_days_with_data, daysWithData)
+                    stringResource(R.string.feature_today_week_days_with_data, daysWithData) +
+                    (if (selectedIndex == null) "\n" + stringResource(CoreUiR.string.core_ui_day_tap_hint) else "")
             },
             modifier = Modifier.padding(top = Spacing.md),
             style = MaterialTheme.typography.bodySmall,

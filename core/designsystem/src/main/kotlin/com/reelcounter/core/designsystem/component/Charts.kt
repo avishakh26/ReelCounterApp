@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +24,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,7 +41,7 @@ import com.reelcounter.core.designsystem.util.rememberReducedMotion
  * One bar of [RcBarChart].
  *
  * @param value the bar's height in any unit; null means "no data", drawn as a stub, never as zero.
- * @param valueLabel short text shown above a [highlighted] bar, e.g. "42".
+ * @param valueLabel short text shown above the bar when it has a value, e.g. "42".
  * @param description what a screen reader says for this bar, e.g. "Monday: about 42 reels".
  */
 @Immutable
@@ -50,15 +54,18 @@ data class RcBar(
 )
 
 /**
- * A compact vertical bar chart for a handful of days. Highlighted bars use the accent color;
- * the rest use a light tint of it. Bars grow in once when first shown, unless the user turned
- * animations off.
+ * A compact vertical bar chart for a handful of days, with each value written above its bar.
+ * The selected bar (or, with no selection, the highlighted one) uses the accent color; the rest a
+ * light tint of it. With [onBarClick] the bars can be tapped, e.g. to show that day's figures.
+ * Bars grow in once when first shown, unless the user turned animations off.
  */
 @Composable
 fun RcBarChart(
     bars: List<RcBar>,
     modifier: Modifier = Modifier,
     chartHeight: Dp = 120.dp,
+    selectedIndex: Int? = null,
+    onBarClick: ((Int) -> Unit)? = null,
 ) {
     val max = bars.maxOfOrNull { it.value ?: 0f }?.takeIf { it > 0f } ?: 1f
     val reducedMotion = rememberReducedMotion()
@@ -76,21 +83,39 @@ fun RcBarChart(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
             verticalAlignment = Alignment.Bottom,
         ) {
-            bars.forEach { bar ->
+            bars.forEachIndexed { index, bar ->
+                val emphasized = if (selectedIndex != null) index == selectedIndex else bar.highlighted
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clearAndSetSemantics { contentDescription = bar.description },
+                        .then(
+                            if (onBarClick != null) {
+                                Modifier.clickable(role = Role.Button) { onBarClick(index) }
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .clearAndSetSemantics {
+                            contentDescription = bar.description
+                            if (onBarClick != null) {
+                                selected = index == selectedIndex
+                                onClick { onBarClick(index); true }
+                            }
+                        },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom,
                 ) {
-                    if (bar.highlighted && bar.value != null) {
+                    if (bar.value != null && bar.valueLabel.isNotEmpty()) {
                         Text(
                             text = bar.valueLabel,
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = colors.primary,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (emphasized) FontWeight.SemiBold else FontWeight.Medium,
+                            ),
+                            color = if (emphasized) colors.primary else colors.onSurfaceVariant,
                             maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Visible,
                             modifier = Modifier.padding(bottom = Spacing.xs),
                         )
                     }
@@ -112,7 +137,7 @@ fun RcBarChart(
                                 // A small floor keeps tiny-but-real values visible.
                                 .height((chartHeight * fraction).coerceAtLeast(if (bar.value > 0f) 4.dp else 2.dp))
                                 .background(
-                                    if (bar.highlighted) colors.primary else colors.primary.copy(alpha = 0.22f),
+                                    if (emphasized) colors.primary else colors.primary.copy(alpha = 0.22f),
                                     shape,
                                 ),
                         )
@@ -128,14 +153,15 @@ fun RcBarChart(
                 .clearAndSetSemantics {},
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            bars.forEach { bar ->
+            bars.forEachIndexed { index, bar ->
+                val emphasized = if (selectedIndex != null) index == selectedIndex else bar.highlighted
                 Text(
                     text = bar.label,
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = if (bar.highlighted) FontWeight.SemiBold else FontWeight.Medium,
+                        fontWeight = if (emphasized) FontWeight.SemiBold else FontWeight.Medium,
                     ),
-                    color = if (bar.highlighted) colors.onSurface else colors.onSurfaceVariant,
+                    color = if (emphasized) colors.onSurface else colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Clip,

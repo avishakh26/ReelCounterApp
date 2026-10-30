@@ -1,13 +1,16 @@
 package com.reelcounter.core.tracking
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.reelcounter.core.domain.tracking.CurrentDateProvider
+import com.reelcounter.core.domain.tracking.DeviceIdProvider
 import com.reelcounter.core.domain.tracking.InstalledApps
 import com.reelcounter.core.domain.tracking.TimeSource
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.UUID
 import javax.inject.Inject
 
 internal class SystemTimeSource @Inject constructor() : TimeSource {
@@ -27,6 +31,22 @@ internal class SystemTimeSource @Inject constructor() : TimeSource {
 
     // Android resets the process default zone when the device zone changes.
     override fun zone(): ZoneId = ZoneId.systemDefault()
+}
+
+/**
+ * Derived from Settings.Secure.ANDROID_ID, which stays the same across reinstalls of this app on
+ * this phone (until a factory reset), hashed together with the account id. The raw value never
+ * leaves the phone; without one, a random id is used (a reinstall then can't be recognized).
+ */
+internal class AndroidDeviceIdProvider @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) : DeviceIdProvider {
+    @SuppressLint("HardwareIds") // Only a hash of it is used, scoped to this app and account.
+    override fun deviceIdFor(userId: String): String {
+        val androidId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+        if (androidId.isNullOrBlank()) return UUID.randomUUID().toString()
+        return UUID.nameUUIDFromBytes("reelcounter-device:$androidId:$userId".toByteArray()).toString()
+    }
 }
 
 internal class PackageManagerInstalledApps @Inject constructor(

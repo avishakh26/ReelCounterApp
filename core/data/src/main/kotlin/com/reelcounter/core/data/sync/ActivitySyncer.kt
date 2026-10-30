@@ -9,6 +9,7 @@ import com.reelcounter.core.domain.auth.AuthRepository
 import com.reelcounter.core.domain.auth.AuthState
 import com.reelcounter.core.domain.sync.ActivitySync
 import com.reelcounter.core.domain.sync.SyncResult
+import com.reelcounter.core.domain.tracking.DayBucketer
 import com.reelcounter.core.domain.tracking.TimeSource
 import com.reelcounter.core.domain.tracking.UPLOAD_CONSENT_VERSION
 import com.reelcounter.core.network.RemoteException
@@ -18,6 +19,8 @@ import com.reelcounter.core.network.activity.NetworkDailySummary
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.LocalDate
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -63,10 +66,12 @@ internal class ActivitySyncer @Inject constructor(
                 syncPreferences.setDeviceRegistered(true)
             }
             // Bounded, in case rows keep changing while they upload; leftovers go in the next sync.
+            val coverageStart = sync.coverageStartDate?.let(LocalDate::parse)
             for (attempt in 1..MAX_BATCHES) {
                 val batch = store.dirtyRows(BATCH_SIZE)
                 if (batch.isEmpty()) break
-                upload(batch, userId, deviceId)
+                val toUpload = withoutDaysOnServer(batch, userId, deviceId, coverageStart)
+                if (toUpload.isNotEmpty()) upload(toUpload, userId, deviceId)
                 if (batch.size < BATCH_SIZE) break
             }
             syncPreferences.setLastSync(time.nowMs())
@@ -74,11 +79,32 @@ internal class ActivitySyncer @Inject constructor(
         } catch (e: RemoteException) {
             if (e.kind == RemoteException.Kind.Database && e.code == PERMISSION_DENIED) {
                 // The device id isn't ours on the server (e.g. reinstall race): start over with a new one.
-                syncPreferences.switchOwner(userId)
+                syncPreferences.switchOwner(userId, UUID.randomUUID().toString(), sync.coverageStartDate ?: today())
             }
             SyncResult.RetryLater
         }
     }
+
+    /**
+     * Days before this install began recording were read back from the phone's usage history. If
+     * the server already has them from another device id (an earlier install of the app here), they
+     * are marked synced instead of uploaded, so friends don't see those days counted twice.
+     */
+    private suspend fun withoutDaysOnServer(
+        batch: List<DailyRow>,
+        userId: String,
+        deviceId: String,
+        coverageStart: LocalDate?,
+    ): List<DailyRow> {
+        val readBack = batch.filter { coverageStart != null && it.date < coverageStart }
+        if (readBack.isEmpty()) return batch
+        val onServer = remote.daysFromOtherDevices(userId, deviceId, readBack.map { it.date.toString() }.toSet())
+        val skip = readBack.filter { (it.date.toString() to it.platformId) in onServer }
+        if (skip.isNotEmpty()) store.markSynced(skip.map { it.version() })
+        return batch - skip.toSet()
+    }
+
+    private fun today(): String = DayBucketer.dateOf(time.nowMs(), time.zone()).toString()
 
     private suspend fun upload(batch: List<DailyRow>, userId: String, deviceId: String) {
         try {

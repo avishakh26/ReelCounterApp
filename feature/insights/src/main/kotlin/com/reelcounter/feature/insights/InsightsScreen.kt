@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -44,9 +45,10 @@ import com.reelcounter.core.designsystem.component.RcSegmentedControl
 import com.reelcounter.core.designsystem.component.SkeletonBlock
 import com.reelcounter.core.designsystem.icon.RcIcons
 import com.reelcounter.core.designsystem.theme.Spacing
+import com.reelcounter.core.ui.metric.DayDetail
 import com.reelcounter.core.ui.metric.DaySummary
-import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.PlatformLogo
+import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.formatAppTime
 import com.reelcounter.core.ui.metric.formatCompactAppTime
 import com.reelcounter.core.ui.metric.formatCount
@@ -255,6 +257,7 @@ private fun ChangeTile(thisTotal: Double?, previousTotal: Double?, modifier: Mod
 @Composable
 private fun ChartCard(week: List<DaySummary>, metric: InsightsMetric) {
     val locale = LocalConfiguration.current.locales[0]
+    var selectedDay by rememberSaveable(week.lastOrNull()?.date) { mutableStateOf<Int?>(null) }
     RcCard(
         modifier = Modifier
             .widthIn(max = ContentMaxWidth)
@@ -288,7 +291,23 @@ private fun ChartCard(week: List<DaySummary>, metric: InsightsMetric) {
                 )
             }
         }
-        RcBarChart(bars = bars, chartHeight = 150.dp)
+        RcBarChart(
+            bars = bars,
+            chartHeight = 150.dp,
+            selectedIndex = selectedDay,
+            onBarClick = { index -> selectedDay = index.takeUnless { it == selectedDay } },
+        )
+        val picked = selectedDay?.let { week.getOrNull(it) }
+        if (picked != null) {
+            DayDetail(day = picked, modifier = Modifier.padding(top = Spacing.md))
+        } else {
+            Text(
+                text = stringResource(CoreUiR.string.core_ui_day_tap_hint),
+                modifier = Modifier.padding(top = Spacing.md),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

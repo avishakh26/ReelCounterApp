@@ -13,10 +13,11 @@
         collected, shared and how it's used. If that changes, update this text AND bump the
         version so every user sees and accepts it again.
         v1 → v2: daily totals are now saved to the user's account.
+        v3 → v4: reads the past week of usage history, not just the past day.
     -->
     <string name="feature_tracking_disclosure_title">How tracking works</string>
     <string name="feature_tracking_disclosure_intro">To show your app time and reel estimates, ReelCounter needs Android\'s Usage access permission. Here\'s exactly what that means:</string>
-    <string name="feature_tracking_disclosure_collects">ReelCounter reads when the apps you choose (TikTok, Instagram, YouTube, Facebook) were open on screen, and for how long, including the past day your phone has already recorded.</string>
+    <string name="feature_tracking_disclosure_collects">ReelCounter reads when the apps you choose (TikTok, Instagram, YouTube, Facebook) were open on screen, and for how long, including the past week your phone has already recorded.</string>
     <string name="feature_tracking_disclosure_not_collected">It never reads what you watch, read or type, and it never records your screen.</string>
     <string name="feature_tracking_disclosure_counting">If you also turn on reel counting, ReelCounter\'s accessibility service adds one to a count each time a new video fills the screen in those apps\' short-video feeds. It looks only at the feed\'s layout (which video is on screen), never at captions, names, comments or messages, and stores only the number.</string>
     <string name="feature_tracking_disclosure_other_apps">Usage of every other app is ignored and never stored.</string>
