@@ -6,6 +6,7 @@ import com.reelcounter.core.domain.tracking.DailyAggregator
 import com.reelcounter.core.domain.tracking.DayBucketer
 import com.reelcounter.core.domain.tracking.DayPlatformKey
 import com.reelcounter.core.domain.tracking.DayTotals
+import com.reelcounter.core.domain.tracking.InstalledApps
 import com.reelcounter.core.domain.tracking.PlatformCatalog
 import com.reelcounter.core.domain.tracking.RefreshResult
 import com.reelcounter.core.domain.tracking.SessionBuilder
@@ -41,6 +42,7 @@ internal class UsageIngestor @Inject constructor(
     private val usageAccess: UsageAccessMonitor,
     private val preferences: TrackingPreferencesStore,
     private val time: TimeSource,
+    private val installedApps: InstalledApps,
 ) {
     private val mutex = Mutex()
 
@@ -164,13 +166,18 @@ internal class UsageIngestor @Inject constructor(
         }
 
         val existing = store.dailyRows(dates).associateBy { it.date to it.platformId }
+        val installed = trackedIds.filter { id -> PlatformCatalog.forId(id)?.let { installedApps.isAnyInstalled(it.packages) } == true }.toSet()
         val rows = dates.flatMap { date ->
             trackedIds.mapNotNull { platformId ->
                 val platform = PlatformCatalog.forId(platformId) ?: return@mapNotNull null
+                val dayTotals = totals[DayPlatformKey(date, platformId)]
+                // An app that isn't on the phone wasn't used: no row ("No data") rather than a 0 that
+                // reads like a measurement. Time recorded before it was uninstalled is still written.
+                if (dayTotals == null && platformId !in installed) return@mapNotNull null
                 val row = DailyRowCalculator.calculate(
                     date = date,
                     platform = platform,
-                    totals = totals[DayPlatformKey(date, platformId)] ?: DayTotals(0, 0),
+                    totals = dayTotals ?: DayTotals(0, 0),
                     settings = settings[platformId],
                     tzId = zone.id,
                     revision = revision,

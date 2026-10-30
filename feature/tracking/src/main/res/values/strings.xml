@@ -23,6 +23,7 @@
     <string name="feature_tracking_disclosure_storage">Each day\'s totals per app (app time and reel estimates) are saved to your ReelCounter account, so they\'re backed up and available on your other devices. The detailed session times stay on this device.</string>
     <string name="feature_tracking_disclosure_sharing">Friends you accept can see your daily totals. You\'ll be able to choose exactly who sees what in Privacy settings.</string>
     <string name="feature_tracking_disclosure_estimates">Without reel counting, reel counts are estimates worked out from app time, and they\'re always labeled as estimates.</string>
+    <string name="feature_tracking_disclosure_estimates_only">Reel counts are estimates worked out from app time, and they\'re always labeled as estimates.</string>
     <string name="feature_tracking_disclosure_control">You can pause tracking in Settings or turn off Usage access at any time.</string>
     <string name="feature_tracking_disclosure_accept">Agree and continue</string>
 

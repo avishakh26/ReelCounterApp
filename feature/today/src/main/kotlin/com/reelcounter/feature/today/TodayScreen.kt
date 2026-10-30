@@ -54,6 +54,7 @@ import com.reelcounter.core.designsystem.theme.Spacing
 import com.reelcounter.core.domain.tracking.TrackingStatus
 import com.reelcounter.core.model.UserProfile
 import com.reelcounter.core.ui.metric.DaySummary
+import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.PlatformActivityRow
 import com.reelcounter.core.ui.metric.formatAppTime
 import com.reelcounter.core.ui.metric.formatCompactAppTime
@@ -112,7 +113,7 @@ internal fun TodayScreen(
             .fillMaxSize()
         when (uiState) {
             TodayUiState.Loading -> TodayLoading(contentModifier)
-            is TodayUiState.NeedsSetup -> TodaySetup(uiState.greetingName, onSetUpTracking, contentModifier)
+            is TodayUiState.NeedsSetup -> TodaySetup(uiState.greetingName, uiState.countingAvailable, onSetUpTracking, contentModifier)
             is TodayUiState.Content -> PullToRefreshBox(
                 isRefreshing = uiState.isRefreshing,
                 onRefresh = onRefresh,
@@ -434,8 +435,8 @@ private fun WeekCard(week: List<DaySummary>) {
                 valueLabel = count?.let { formatCount(it) }.orEmpty()
                 description = when {
                     count == null -> stringResource(R.string.feature_today_bar_no_data, fullDate)
-                    day.isEstimate -> stringResource(R.string.feature_today_bar_reels, fullDate, formatCount(count))
-                    else -> stringResource(R.string.feature_today_bar_videos, fullDate, formatCount(count))
+                    day.isEstimate -> pluralStringResource(R.plurals.feature_today_bar_reels, count, fullDate, formatCount(count))
+                    else -> pluralStringResource(R.plurals.feature_today_bar_videos, count, fullDate, formatCount(count))
                 }
             } else {
                 value = day.appTime?.inWholeMinutes?.toFloat()
@@ -461,24 +462,32 @@ private fun WeekCard(week: List<DaySummary>) {
     }
 }
 
-/** The average over days that have data. Days without data are left out rather than counted as zero. */
+/**
+ * The average over completed days that have data. Days without data are left out rather than
+ * counted as zero, and today counts only once it's over (see [daysForAverage]).
+ */
 @Composable
 private fun weekSummary(week: List<DaySummary>, useCounts: Boolean, anyEstimate: Boolean): String =
     if (useCounts) {
-        val counts = week.mapNotNull { it.count }
+        val counts = week.daysForAverage { it.count != null }.mapNotNull { it.count }
         val average = counts.sum() / counts.size
         stringResource(
             if (anyEstimate) R.string.feature_today_week_average_reels else R.string.feature_today_week_average_videos,
             formatCount(average),
         )
     } else {
-        val times = week.mapNotNull { it.appTime }
+        val times = week.daysForAverage { it.appTime != null }.mapNotNull { it.appTime }
         val average = times.fold(Duration.ZERO, Duration::plus) / times.size
         stringResource(R.string.feature_today_week_average_time, formatAppTime(average))
     }
 
 @Composable
-private fun TodaySetup(greetingName: String?, onSetUpTracking: () -> Unit, modifier: Modifier) {
+private fun TodaySetup(
+    greetingName: String?,
+    countingAvailable: Boolean,
+    onSetUpTracking: () -> Unit,
+    modifier: Modifier,
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.xxl),
@@ -518,7 +527,12 @@ private fun TodaySetup(greetingName: String?, onSetUpTracking: () -> Unit, modif
                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
                     SetupPoint(RcIcons.AppTime, stringResource(R.string.feature_today_setup_point_time))
-                    SetupPoint(RcIcons.Reels, stringResource(R.string.feature_today_setup_point_estimates))
+                    SetupPoint(
+                        RcIcons.Reels,
+                        stringResource(
+                            if (countingAvailable) R.string.feature_today_setup_point_estimates else R.string.feature_today_setup_point_estimates_only,
+                        ),
+                    )
                     SetupPoint(RcIcons.Paused, stringResource(R.string.feature_today_setup_point_control))
                 }
                 RcButton(

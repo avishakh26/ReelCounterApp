@@ -1,5 +1,6 @@
 package com.reelcounter.core.data.tracking
 
+import com.reelcounter.core.domain.tracking.InstalledApps
 import com.reelcounter.core.domain.tracking.PlatformCatalog
 import com.reelcounter.core.domain.tracking.RefreshResult
 import com.reelcounter.core.domain.tracking.UsageEvent
@@ -31,7 +32,11 @@ class UsageIngestorTest {
     private val access = FakeUsageAccess()
     private val prefs = FakeTrackingPreferences()
     private val time = FakeTimeSource(nowMs = at("2026-10-20T12:00"), zone = zone)
-    private val ingestor = UsageIngestor(store, source, access, prefs, time)
+    private var installedPackages: Set<String>? = null // null: everything is installed
+    private val installed = object : InstalledApps {
+        override fun isAnyInstalled(packages: Set<String>) = installedPackages?.let { packages.any(it::contains) } ?: true
+    }
+    private val ingestor = UsageIngestor(store, source, access, prefs, time, installed)
 
     private fun use(pkg: String, from: String, minutes: Long) {
         val start = at(from)
@@ -61,6 +66,19 @@ class UsageIngestorTest {
 
         // Covered days get rows even for unused apps, so "0 min" differs from "no data".
         assertEquals(0L, store.row(today, "instagram")?.foregroundMs)
+    }
+
+    @Test
+    fun `apps that aren't installed get no row, unless they were used`() = runTest {
+        installedPackages = setOf("com.zhiliaoapp.musically")
+        // YouTube was used this morning and uninstalled since: its time still counts.
+        use(youtube, "2026-10-20T08:00", 15)
+
+        ingestor.ingest()
+
+        assertNotNull(store.row(today, "tiktok")) // installed, unused: a measured 0
+        assertEquals(15 * minute, store.row(today, "youtube")?.foregroundMs)
+        assertEquals(null, store.row(today, "instagram")) // not installed: no data
     }
 
     @Test

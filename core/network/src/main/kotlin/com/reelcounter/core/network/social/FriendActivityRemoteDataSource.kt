@@ -1,5 +1,6 @@
 package com.reelcounter.core.network.social
 
+import com.reelcounter.core.network.RemoteException
 import com.reelcounter.core.network.remoteCall
 import dagger.Lazy
 import io.github.jan.supabase.SupabaseClient
@@ -63,9 +64,20 @@ internal class SupabaseFriendActivityRemoteDataSource @Inject constructor(
 
     override suspend fun dailyTotals(userIds: Collection<String>, from: LocalDate): List<NetworkDailyTotal> {
         if (userIds.isEmpty()) return emptyList()
-        return remoteCall {
+        return try {
+            dailyTotals(userIds, from, TOTAL_COLUMNS)
+        } catch (e: RemoteException) {
+            // A server without the counted-reels migration has no counted_reels column, and asking
+            // for it fails the whole query. Ask again without it rather than show nothing.
+            if (e.kind != RemoteException.Kind.Database || e.code != UNDEFINED_COLUMN) throw e
+            dailyTotals(userIds, from, TOTAL_COLUMNS_WITHOUT_COUNTED)
+        }
+    }
+
+    private suspend fun dailyTotals(userIds: Collection<String>, from: LocalDate, columns: Columns): List<NetworkDailyTotal> =
+        remoteCall {
             postgrest.from("daily_activity_totals")
-                .select(TOTAL_COLUMNS) {
+                .select(columns) {
                     filter {
                         isIn("user_id", userIds.toList())
                         gte("activity_date", from.toString())
@@ -73,7 +85,6 @@ internal class SupabaseFriendActivityRemoteDataSource @Inject constructor(
                 }
                 .decodeList()
         }
-    }
 
     override suspend fun suggestions(maxResults: Int): List<NetworkSuggestion> = remoteCall {
         postgrest.rpc("suggest_friends", buildJsonObject { put("max_results", maxResults) }).decodeList()
@@ -84,9 +95,14 @@ internal class SupabaseFriendActivityRemoteDataSource @Inject constructor(
     }
 
     private companion object {
-        val TOTAL_COLUMNS = Columns.list(
+        val BASE_COLUMNS = listOf(
             "user_id", "platform_id", "activity_date", "foreground_ms", "estimated_reels",
-            "estimated_reels_low", "estimated_reels_high", "verified_reels", "best_quality", "user_adjusted", "counted_reels",
+            "estimated_reels_low", "estimated_reels_high", "verified_reels", "best_quality", "user_adjusted",
         )
+        val TOTAL_COLUMNS = Columns.list(BASE_COLUMNS + "counted_reels")
+        val TOTAL_COLUMNS_WITHOUT_COUNTED = Columns.list(BASE_COLUMNS)
+
+        /** Postgres SQLSTATE undefined_column. */
+        const val UNDEFINED_COLUMN = "42703"
     }
 }

@@ -93,18 +93,25 @@ internal class SupabaseAuthRemoteDataSource @Inject constructor(
 
     override suspend fun deleteAccount() = remoteCall {
         val userId = auth.currentUserOrNull()?.id
-        if (userId != null) {
-            // Storage files can't be deleted with SQL, so profile photos go first. A failure here
-            // must not block the deletion itself; leftover files are unreachable without the profile.
+        val avatars = client.get().storage.from(AVATAR_BUCKET)
+        // Storage files can't be deleted with SQL, so the app removes the profile photos itself:
+        // listed before, removed after the account is gone (the session is still accepted for
+        // that). If the server can't delete the account, nothing has been touched.
+        val photos = userId?.let { id ->
             try {
-                val avatars = client.get().storage.from(AVATAR_BUCKET)
-                val files = avatars.list(userId).map { "$userId/${it.name}" }
-                if (files.isNotEmpty()) avatars.delete(files)
+                avatars.list(id).map { "$id/${it.name}" }
             } catch (_: Exception) {
-                // Best effort, see above.
+                emptyList()
+            }
+        }.orEmpty()
+        client.get().postgrest.rpc("delete_my_account")
+        if (photos.isNotEmpty()) {
+            try {
+                avatars.delete(photos)
+            } catch (_: Exception) {
+                // Best effort: without the profile nothing links to them any more.
             }
         }
-        client.get().postgrest.rpc("delete_my_account")
         auth.clearSession()
     }
 

@@ -1,7 +1,6 @@
 package com.reelcounter.feature.friends.detail
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,6 +13,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -61,18 +61,21 @@ internal fun FriendDetailScreen(
     viewModel: FriendDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     // Their phone may have synced while this screen was in the background.
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         onPauseOrDispose { }
     }
-    FriendDetailScreen(uiState = uiState, onBack = onBack)
+    FriendDetailScreen(uiState = uiState, isRefreshing = isRefreshing, onRefresh = viewModel::pullToRefresh, onBack = onBack)
 }
 
 @Composable
 internal fun FriendDetailScreen(
     uiState: FriendDetailUiState,
     onBack: () -> Unit,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -95,8 +98,12 @@ internal fun FriendDetailScreen(
                 icon = RcIcons.Friends,
                 modifier = modifier,
             )
-            // Figures refresh live and whenever the screen resumes, so there's no pull-to-refresh.
-            is FriendDetailUiState.Content -> Box(modifier = modifier) { FriendContent(uiState) }
+            // Figures also refresh live and whenever the screen resumes.
+            is FriendDetailUiState.Content -> PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier,
+            ) { FriendContent(uiState) }
         }
     }
 }
@@ -301,8 +308,8 @@ private fun WeekCard(week: List<DaySummary>) {
                     valueLabel = count?.let { formatCount(it) }.orEmpty(),
                     description = when {
                         count == null -> stringResource(R.string.feature_friends_bar_no_data, fullDate)
-                        day.isEstimate -> stringResource(R.string.feature_friends_bar_reels, fullDate, formatCount(count))
-                        else -> stringResource(R.string.feature_friends_bar_videos, fullDate, formatCount(count))
+                        day.isEstimate -> pluralStringResource(R.plurals.feature_friends_bar_reels, count, fullDate, formatCount(count))
+                        else -> pluralStringResource(R.plurals.feature_friends_bar_videos, count, fullDate, formatCount(count))
                     },
                     highlighted = index == week.lastIndex,
                 )

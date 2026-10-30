@@ -4,6 +4,10 @@
     <string name="feature_profile_setup_intro">Pick a username so friends can find you. You can change everything here later.</string>
     <string name="feature_profile_edit_title">Edit profile</string>
     <string name="feature_profile_back">Back</string>
+    <string name="feature_profile_discard_title">Discard changes?</string>
+    <string name="feature_profile_discard_message">Your changes to your profile haven\'t been saved.</string>
+    <string name="feature_profile_discard_confirm">Discard</string>
+    <string name="feature_profile_discard_keep">Keep editing</string>
     <string name="feature_profile_sign_out">Sign out</string>
     <string name="feature_profile_change_photo">Change photo</string>
 

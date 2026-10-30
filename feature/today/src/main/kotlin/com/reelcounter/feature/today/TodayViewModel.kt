@@ -32,7 +32,11 @@ sealed interface TodayUiState {
     data object Loading : TodayUiState
 
     /** Tracking has never been set up (or the disclosure needs accepting). */
-    data class NeedsSetup(val greetingName: String? = null) : TodayUiState
+    data class NeedsSetup(
+        val greetingName: String? = null,
+        /** This build can count reels one by one (it includes the accessibility service). */
+        val countingAvailable: Boolean = true,
+    ) : TodayUiState
 
     data class Content(
         val date: LocalDate,
@@ -66,6 +70,8 @@ class TodayViewModel @Inject constructor(
     profileRepository: ProfileRepository,
     countingStatus: ReelCountingStatus,
 ) : ViewModel() {
+
+    private val countingAvailable = countingStatus.isAvailable
 
     private val isRefreshing = MutableStateFlow(false)
 
@@ -115,7 +121,7 @@ class TodayViewModel @Inject constructor(
                 profile = profile,
                 countingEnabled = counting,
             )
-            is TodayUiState.NeedsSetup -> state.copy(greetingName = profile?.greetingName())
+            is TodayUiState.NeedsSetup -> state.copy(greetingName = profile?.greetingName(), countingAvailable = countingAvailable)
             TodayUiState.Loading -> state
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState.Loading)

@@ -71,5 +71,8 @@ sealed interface AuthError {
     data object SignUpDisabled : AuthError
     data object Network : AuthError
     data object NotConfigured : AuthError
+
+    /** The server is missing a newer database update (a function or column this needs). */
+    data object ServerOutdated : AuthError
     data class Unknown(val code: String?) : AuthError
 }

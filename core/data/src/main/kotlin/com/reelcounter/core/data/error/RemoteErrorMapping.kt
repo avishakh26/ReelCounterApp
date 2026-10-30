@@ -19,8 +19,16 @@ internal fun RemoteException.toAuthError(): AuthError = when (kind) {
         "signup_disabled", "email_provider_disabled" -> AuthError.SignUpDisabled
         else -> AuthError.Unknown(code)
     }
-    Kind.Database, Kind.Server, Kind.Unknown -> AuthError.Unknown(code)
+    Kind.Database -> if (isServerOutdated()) AuthError.ServerOutdated else AuthError.Unknown(code)
+    Kind.Server, Kind.Unknown -> AuthError.Unknown(code)
 }
+
+/**
+ * The server doesn't have something the app calls: a function (PostgREST PGRST202, Postgres
+ * 42883) or a column (42703). Happens when a newer migration hasn't been run on the project yet.
+ */
+internal fun RemoteException.isServerOutdated(): Boolean =
+    kind == Kind.Database && code in setOf("PGRST202", "42883", "42703")
 
 internal fun RemoteException.toProfileError(): ProfileError = when (kind) {
     Kind.Network, Kind.Timeout -> ProfileError.Network

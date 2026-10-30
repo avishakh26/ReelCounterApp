@@ -180,8 +180,31 @@ Developer account yet**. Everything is in `ios/` (see `ios/README.md`), develope
   `delete_my_account` RPC; Google Play requires it). DB tests for it in `supabase/tests/pglite/run.mjs`
   (142 pass). Android: 166 unit tests pass with `-PwarningsAsErrors=true`.
 
-## 10. Other files made for the user
+## 10. Bug-hunt fixes (2026-10-30, branch `ios-app`)
+
+QA on the emulator (local backend, two accounts) plus probing the hosted project found 10 bugs; all fixed:
+- **Hosted Supabase was missing migrations 20261029120000/130000/140000** (+ new 20261030120000). One paste
+  file `hosted-update.sql` (generated from those migrations; `supabase/tests/pglite/hosted-update-check.mjs`
+  checks it applies in one go on a hosted-setup.sql database). The user still has to run it.
+- App now degrades on an outdated server: friends' totals retry without `counted_reels` on SQLSTATE 42703
+  (`SupabaseFriendActivityRemoteDataSource`); PGRST202/42883/42703 map to `SocialError.ServerOutdated` /
+  `AuthError.ServerOutdated` with "needs its latest database update" messages.
+- Delete account: delete_my_account first, then remove avatar files (session still accepted). Verified the
+  photo can be removed after the user row is gone. **iOS `SessionStore.deleteAccount` still deletes the photo
+  first** (user said to leave iOS for now).
+- New migration `20261030120000_privacy_change_notify.sql`: changing activity_visibility/stealth_mode sends
+  `activity` to friends, so open friend pages update live. FriendDetail has working pull-to-refresh again.
+- Daily averages leave out today until it's over (`daysForAverage` in core/ui), unless today is the only day.
+- Profile editor asks "Discard changes?" when leaving with edits (`hasUnsavedChanges`).
+- `UsageIngestor` takes `InstalledApps`: no zero rows for tracked apps that aren't installed (shown as
+  "App isn't installed" instead of "≈ 0"); time recorded before uninstalling is kept.
+- No reel-counting promises in builds without the service (Today setup card, disclosure); sign-up subtitle no
+  longer promises an emailed code; "about 1 reel" plurals in chart labels.
+- Android: 170 unit tests pass with -PwarningsAsErrors=true; DB tests 144 pass.
+
+## 11. Other files made for the user
 
 - `MANUAL_TEST_CHECKLIST.md`: 67 manual QA cases (written before the redesign; screens changed since).
 - `hosted-setup.sql`: the first 3 migrations combined for the hosted SQL Editor.
+- `hosted-update.sql`: every later migration combined, to paste once on the hosted project.
 - `demo-login.local.txt`: local-only demo login.

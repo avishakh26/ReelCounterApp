@@ -59,6 +59,9 @@ sealed interface SocialError {
     data object Network : SocialError
     data object RateLimited : SocialError
     data object NotSignedIn : SocialError
+
+    /** The server is missing a newer database update (a function or column this feature needs). */
+    data object ServerOutdated : SocialError
     data class Unknown(val code: String?) : SocialError
 }
 

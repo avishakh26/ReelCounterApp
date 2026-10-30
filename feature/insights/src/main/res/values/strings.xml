@@ -22,8 +22,6 @@
 
     <!-- Chart -->
     <string name="feature_insights_chart_title">Day by day</string>
-    <string name="feature_insights_bar_reels">%1$s: about %2$s reels</string>
-    <string name="feature_insights_bar_videos">%1$s: %2$s reels</string>
     <string name="feature_insights_bar_time">%1$s: %2$s app time</string>
     <string name="feature_insights_bar_no_data">%1$s: no data</string>
 
@@ -38,4 +36,12 @@
     <string name="feature_insights_today">Today</string>
     <string name="feature_insights_yesterday">Yesterday</string>
     <string name="feature_insights_no_data">No data</string>
+    <plurals name="feature_insights_bar_reels">
+        <item quantity="one">%1$s: about %2$s reel</item>
+        <item quantity="other">%1$s: about %2$s reels</item>
+    </plurals>
+    <plurals name="feature_insights_bar_videos">
+        <item quantity="one">%1$s: %2$s reel</item>
+        <item quantity="other">%1$s: %2$s reels</item>
+    </plurals>
 </resources>

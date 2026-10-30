@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -44,6 +45,7 @@ import com.reelcounter.core.designsystem.component.SkeletonBlock
 import com.reelcounter.core.designsystem.icon.RcIcons
 import com.reelcounter.core.designsystem.theme.Spacing
 import com.reelcounter.core.ui.metric.DaySummary
+import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.PlatformLogo
 import com.reelcounter.core.ui.metric.formatAppTime
 import com.reelcounter.core.ui.metric.formatCompactAppTime
@@ -271,8 +273,8 @@ private fun ChartCard(week: List<DaySummary>, metric: InsightsMetric) {
                     valueLabel = count?.let { formatCount(it) }.orEmpty(),
                     description = when {
                         count == null -> stringResource(R.string.feature_insights_bar_no_data, fullDate)
-                        day.isEstimate -> stringResource(R.string.feature_insights_bar_reels, fullDate, formatCount(count))
-                        else -> stringResource(R.string.feature_insights_bar_videos, fullDate, formatCount(count))
+                        day.isEstimate -> pluralStringResource(R.plurals.feature_insights_bar_reels, count, fullDate, formatCount(count))
+                        else -> pluralStringResource(R.plurals.feature_insights_bar_videos, count, fullDate, formatCount(count))
                     },
                     highlighted = index == week.lastIndex,
                 )
@@ -419,8 +421,9 @@ private fun platformValue(total: PlatformTotal, metric: InsightsMetric): Double?
 private fun total(days: List<DaySummary>, metric: InsightsMetric): Double? =
     days.mapNotNull { dayValue(it, metric) }.takeIf { it.isNotEmpty() }?.sum()
 
+/** Over completed days with data; today counts once it's over (see [daysForAverage]). */
 private fun average(days: List<DaySummary>, metric: InsightsMetric): Double? =
-    days.mapNotNull { dayValue(it, metric) }.takeIf { it.isNotEmpty() }?.average()
+    days.daysForAverage { dayValue(it, metric) != null }.mapNotNull { dayValue(it, metric) }.takeIf { it.isNotEmpty() }?.average()
 
 @Composable
 private fun formatValue(value: Double, metric: InsightsMetric, isEstimate: Boolean): String = when (metric) {

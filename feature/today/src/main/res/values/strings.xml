@@ -14,6 +14,7 @@
     <string name="feature_today_setup_message">Set up tracking to see how many reels you watch in TikTok, Instagram, YouTube and Facebook, and how long you spend there.</string>
     <string name="feature_today_setup_point_time">App time for each tracked app, measured by Android</string>
     <string name="feature_today_setup_point_estimates">Every Short, Reel and TikTok counted one by one, once you turn on reel counting</string>
+    <string name="feature_today_setup_point_estimates_only">Reels estimated from that time, shown with ≈ and a likely range</string>
     <string name="feature_today_setup_point_control">Pause tracking or turn off access whenever you like</string>
     <string name="feature_today_setup_action">Set up tracking</string>
 
@@ -39,8 +40,6 @@
     <string name="feature_today_week_days_with_data">%1$d of 7 days with data</string>
     <string name="feature_today_week_empty">Your week fills in as you use tracked apps.</string>
     <!-- Screen reader text for one bar, e.g. "Monday 26 October: about 42 reels" -->
-    <string name="feature_today_bar_reels">%1$s: about %2$s reels</string>
-    <string name="feature_today_bar_videos">%1$s: %2$s reels</string>
     <string name="feature_today_bar_time">%1$s: %2$s app time</string>
     <string name="feature_today_bar_no_data">%1$s: no data</string>
 
@@ -56,4 +55,12 @@
     <string name="feature_today_turn_on">Turn it back on</string>
     <string name="feature_today_counted_note">Reels are counted one by one as each new video fills the screen. Days from before counting was on show estimates from app time.</string>
     <string name="feature_today_estimate_note">Reel counts are estimates from app time: Android can\'t see which part of an app you\'re using.</string>
+    <plurals name="feature_today_bar_reels">
+        <item quantity="one">%1$s: about %2$s reel</item>
+        <item quantity="other">%1$s: about %2$s reels</item>
+    </plurals>
+    <plurals name="feature_today_bar_videos">
+        <item quantity="one">%1$s: %2$s reel</item>
+        <item quantity="other">%1$s: %2$s reels</item>
+    </plurals>
 </resources>

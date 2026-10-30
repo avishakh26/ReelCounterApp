@@ -26,6 +26,7 @@ internal fun AuthError.messageRes(): Int = when (this) {
     AuthError.SignUpDisabled -> R.string.feature_auth_error_signup_disabled
     AuthError.Network -> R.string.feature_auth_error_network
     AuthError.NotConfigured -> R.string.feature_auth_error_not_configured
+    AuthError.ServerOutdated -> R.string.feature_auth_error_server_outdated
     is AuthError.Unknown -> R.string.feature_auth_error_unknown
 }
 

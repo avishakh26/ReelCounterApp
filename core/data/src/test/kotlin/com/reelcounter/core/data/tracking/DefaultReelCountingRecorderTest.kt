@@ -22,7 +22,7 @@ class DefaultReelCountingRecorderTest {
     private val source = FakeUsageEventSource()
     private val prefs = FakeTrackingPreferences()
     private val time = FakeTimeSource(nowMs = at("2026-10-20T12:00"), zone = zone)
-    private val ingestor = UsageIngestor(store, source, FakeUsageAccess(), prefs, time)
+    private val ingestor = UsageIngestor(store, source, FakeUsageAccess(), prefs, time, FakeInstalledApps())
 
     private fun kotlinx.coroutines.test.TestScope.recorder() = DefaultReelCountingRecorder(
         store, prefs, time, ingestor, FakeTrackingRepository(TrackingStatus.Active), FakeReelCountingStatus(enabled = true), backgroundScope,

@@ -31,6 +31,7 @@ Thumbs.db
 
 # Built APKs and IDE build output
 *.apk
+*.ipa
 bin/
 
 # Local-only test logins

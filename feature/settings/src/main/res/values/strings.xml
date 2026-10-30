@@ -23,13 +23,14 @@
     <string name="feature_settings_delete_failed_title">Account not deleted</string>
     <string name="feature_settings_delete_failed_offline">Can\'t reach ReelCounter. Check your connection and try again.</string>
     <string name="feature_settings_delete_failed">Something went wrong, so nothing was deleted. Please try again.</string>
+    <string name="feature_settings_delete_failed_server">Account deletion isn\'t set up on the ReelCounter server yet, so nothing was deleted.</string>
     <string name="feature_settings_ok">OK</string>
     <string name="feature_settings_sign_out_message">You can sign back in any time with your email and password.</string>
     <string name="feature_settings_cancel">Cancel</string>
 
     <string name="feature_settings_how_we_count_intro">ReelCounter uses only what your phone already records and what platforms officially share. Every number is labeled with where it came from.</string>
     <string name="feature_settings_quality_verified">Counted by the platform itself and shared with your permission. Only some platforms offer this, and only in some regions.</string>
-    <string name="feature_settings_quality_counted">Counted one by one on your phone: each time a new video fills the screen in the app\'s short-video feed, ReelCounter adds one. This needs reel counting turned on in Tracking &amp; apps.</string>
+    <string name="feature_settings_quality_counted">Counted one by one on the phone: each time a new video fills the screen in the app\'s short-video feed, ReelCounter adds one. Only some versions of ReelCounter for Android can do this, so you may see it on friends\' figures.</string>
     <string name="feature_settings_quality_estimated">Worked out from how long the app was open, using assumptions about how much of that time is reels and how long each one lasts. You can adjust the assumptions. Estimates always show a likely range.</string>
     <string name="feature_settings_quality_duration_only">How long the app was open. Where reels are a small or varied part of an app, we show the time without guessing a count.</string>
     <string name="feature_settings_quality_unavailable">Nothing could be measured, for example because usage access is off, tracking is paused, or the app was used on the web.</string>

@@ -188,7 +188,11 @@ internal fun SettingsScreen(
         RcAlertDialog(
             title = stringResource(R.string.feature_settings_delete_failed_title),
             text = stringResource(
-                if (deletion.error == AuthError.Network) R.string.feature_settings_delete_failed_offline else R.string.feature_settings_delete_failed,
+                when (deletion.error) {
+                    AuthError.Network -> R.string.feature_settings_delete_failed_offline
+                    AuthError.ServerOutdated -> R.string.feature_settings_delete_failed_server
+                    else -> R.string.feature_settings_delete_failed
+                },
             ),
             confirmText = stringResource(R.string.feature_settings_ok),
             onConfirm = onDismissDeletionError,
