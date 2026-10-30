@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,16 +22,24 @@ data class SyncState(
     val deviceId: String? = null,
     val deviceRegistered: Boolean = false,
     val lastSyncMs: Long? = null,
+    /**
+     * The day this install started recording for the owner ("yyyy-MM-dd"). Days before it were read
+     * back from the phone's usage history and may already be on the server from an earlier install.
+     */
+    val coverageStartDate: String? = null,
 )
 
 interface SyncPreferencesStore {
     val state: Flow<SyncState>
 
-    /** The first account to sign in adopts the data already recorded on this device. */
-    suspend fun adoptOwner(userId: String)
+    /**
+     * The first account to sign in adopts the data already recorded on this device. An existing
+     * device id and coverage start are kept; otherwise [deviceId] and [coverageStartDate] are used.
+     */
+    suspend fun adoptOwner(userId: String, deviceId: String, coverageStartDate: String)
 
-    /** A different account signed in: new owner and a new device id (the old one belongs to the old owner). */
-    suspend fun switchOwner(userId: String)
+    /** A different account signed in (or the id was refused): new owner, device id and coverage start. */
+    suspend fun switchOwner(userId: String, deviceId: String, coverageStartDate: String)
 
     suspend fun setDeviceRegistered(registered: Boolean)
     suspend fun setLastSync(atMs: Long)
@@ -53,21 +60,24 @@ internal class DataStoreSyncPreferencesStore @Inject constructor(
                 deviceId = it[DEVICE_ID],
                 deviceRegistered = it[DEVICE_REGISTERED] ?: false,
                 lastSyncMs = it[LAST_SYNC],
+                coverageStartDate = it[COVERAGE_START],
             )
         }
 
-    override suspend fun adoptOwner(userId: String) {
+    override suspend fun adoptOwner(userId: String, deviceId: String, coverageStartDate: String) {
         context.syncDataStore.edit {
             it[OWNER] = userId
-            if (it[DEVICE_ID] == null) it[DEVICE_ID] = UUID.randomUUID().toString()
+            if (it[DEVICE_ID] == null) it[DEVICE_ID] = deviceId
+            if (it[COVERAGE_START] == null) it[COVERAGE_START] = coverageStartDate
         }
     }
 
-    override suspend fun switchOwner(userId: String) {
+    override suspend fun switchOwner(userId: String, deviceId: String, coverageStartDate: String) {
         context.syncDataStore.edit {
             it[OWNER] = userId
-            it[DEVICE_ID] = UUID.randomUUID().toString()
+            it[DEVICE_ID] = deviceId
             it[DEVICE_REGISTERED] = false
+            it[COVERAGE_START] = coverageStartDate
             it.remove(LAST_SYNC)
         }
     }
@@ -84,6 +94,7 @@ internal class DataStoreSyncPreferencesStore @Inject constructor(
         val OWNER = stringPreferencesKey("owner_user_id")
         val DEVICE_ID = stringPreferencesKey("device_id")
         val DEVICE_REGISTERED = booleanPreferencesKey("device_registered")
+        val COVERAGE_START = stringPreferencesKey("coverage_start")
         val LAST_SYNC = longPreferencesKey("last_sync_ms")
     }
 }

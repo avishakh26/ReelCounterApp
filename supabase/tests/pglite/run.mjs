@@ -455,6 +455,48 @@ await db.query('delete from auth.users where id = $1', [ALICE]);
   report(p.rows[0].n === 0 && s.rows[0].n === 0, 'deleting the auth user removes profile and settings');
 }
 
+// ── Privacy changes reach friends live ────────────────────────────────
+console.log('\nprivacy change notifications');
+const KAI = '00000000-0000-4000-8000-0000000000b1';
+const LEA = '00000000-0000-4000-8000-0000000000b2';
+await db.query(`insert into auth.users (id, email) values ($1, 'kai@example.com'), ($2, 'lea@example.com')`, [KAI, LEA]);
+await db.query(`update public.profiles set username = case id when $1::uuid then 'kai' else 'lea' end where id in ($1, $2)`, [KAI, LEA]);
+await rpc(KAI, `select public.send_friend_request($1)`, [LEA]);
+await rpc(LEA, `select public.respond_friend_request($1, true)`, [KAI]);
+await db.query(`delete from realtime.messages where extension = 'broadcast'`);
+await as(KAI, () => db.query(`update public.user_privacy_settings set activity_visibility = 'private' where user_id = $1`, [KAI]));
+{
+  const { rows } = await db.query(
+    `select event, payload->>'user_id' as owner from realtime.messages where extension = 'broadcast' and topic = $1`,
+    [`friendships:${LEA}`],
+  );
+  report(rows.length === 1 && rows[0].event === 'activity' && rows[0].owner === KAI,
+    'hiding your figures tells each friend whose figures changed');
+}
+await db.query(`delete from realtime.messages where extension = 'broadcast'`);
+await as(KAI, () => db.query(`update public.user_privacy_settings set discoverable = false where user_id = $1`, [KAI]));
+report((await broadcastsTo(`friendships:${LEA}`)) === 0, 'other privacy settings send nothing');
+
+// ── Deleting your own account from the app ────────────────────────────
+console.log('\ndelete_my_account');
+const JUNO = '00000000-0000-4000-8000-0000000000a7';
+await db.query(`insert into auth.users (id, email) values ($1, 'juno@example.com')`, [JUNO]);
+await expectError('signed-out callers cannot delete accounts', null, 'select public.delete_my_account()', [], '42501');
+{
+  const before = await db.query('select count(*)::int as n from auth.users');
+  try {
+    await as(JUNO, () => db.query('select public.delete_my_account()'));
+    report(true, 'a signed-in user can delete their account');
+  } catch (e) {
+    report(false, 'a signed-in user can delete their account', `${e.code}: ${e.message}`);
+  }
+  const after = await db.query('select count(*)::int as n from auth.users');
+  const juno = await db.query('select count(*)::int as n from auth.users where id = $1', [JUNO]);
+  const profile = await db.query('select count(*)::int as n from public.profiles where id = $1', [JUNO]);
+  report(juno.rows[0].n === 0 && profile.rows[0].n === 0, 'their auth user and profile are gone');
+  report(after.rows[0].n === before.rows[0].n - 1, 'and nobody else was deleted');
+}
+
 console.log(`\n${passes} passed, ${failures} failed`);
 await db.close();
 process.exit(failures === 0 ? 0 : 1);

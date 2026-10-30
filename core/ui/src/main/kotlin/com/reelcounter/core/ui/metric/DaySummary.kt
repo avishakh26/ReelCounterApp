@@ -62,3 +62,13 @@ fun List<DailyPlatformActivity>.summarize(date: LocalDate): DaySummary {
     }
     return DaySummary(date = date, count = count, countLow = low, countHigh = high, appTime = appTime, isEstimate = isEstimate)
 }
+
+/**
+ * The days a daily average should use, oldest first with today last: the completed days, since
+ * today is still in progress and would pull the average down. Today alone is used only when no
+ * earlier day has data, so a first day still shows something. [hasData] picks the figure.
+ */
+fun List<DaySummary>.daysForAverage(hasData: (DaySummary) -> Boolean): List<DaySummary> {
+    val completed = dropLast(1).filter(hasData)
+    return completed.ifEmpty { takeLast(1).filter(hasData) }
+}

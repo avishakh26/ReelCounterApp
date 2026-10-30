@@ -121,6 +121,31 @@ class ActivitySyncerTest {
     }
 
     @Test
+    fun `read-back days already on the server from an earlier install aren't uploaded twice`() = runTest {
+        // This install started recording the day after `day`; `day` was read back from usage history.
+        sync.current.value = sync.current.value.copy(coverageStartDate = day.plusDays(1).toString())
+        remote.otherDevices += day.toString() to "tiktok"
+        dirtyRow("tiktok")
+        dirtyRow("youtube")
+
+        assertEquals(SyncResult.Synced, syncer.syncNow())
+
+        assertEquals(listOf("youtube"), remote.accepted.map { it.platformId })
+        assertTrue(store.dirtyRows(10).isEmpty(), "the skipped day counts as synced")
+    }
+
+    @Test
+    fun `days since this install began are always uploaded`() = runTest {
+        sync.current.value = sync.current.value.copy(coverageStartDate = day.toString())
+        remote.otherDevices += day.toString() to "tiktok" // e.g. a second phone
+        dirtyRow("tiktok")
+
+        syncer.syncNow()
+
+        assertEquals(listOf("tiktok"), remote.accepted.map { it.platformId })
+    }
+
+    @Test
     fun `data still owned by another account is never uploaded`() = runTest {
         dirtyRow("tiktok")
         sync.current.value = SyncState(ownerUserId = "someone-else", deviceId = "device-1")
@@ -136,6 +161,12 @@ private class FakeActivityRemote : ActivityRemoteDataSource {
     val accepted = mutableListOf<NetworkDailySummary>()
     var failure: RemoteException? = null
     var beforeUpload: (suspend () -> Unit)? = null
+
+    /** (date, platform) pairs the server has from other device ids of the same user. */
+    val otherDevices = mutableSetOf<Pair<String, String>>()
+
+    override suspend fun daysFromOtherDevices(userId: String, deviceId: String, dates: Collection<String>) =
+        otherDevices.filter { it.first in dates }.toSet()
 
     override suspend fun registerDevice(deviceId: String, userId: String) {
         failure?.let { throw it }

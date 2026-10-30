@@ -8,6 +8,8 @@ import com.reelcounter.core.datastore.TrackingPreferencesStore
 import com.reelcounter.core.domain.auth.AuthRepository
 import com.reelcounter.core.domain.auth.AuthState
 import com.reelcounter.core.domain.sync.SyncScheduler
+import com.reelcounter.core.domain.tracking.DayBucketer
+import com.reelcounter.core.domain.tracking.DeviceIdProvider
 import com.reelcounter.core.domain.tracking.TimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -35,6 +37,7 @@ internal class AccountDataGuard @Inject constructor(
     private val store: TrackingLocalStore,
     private val syncScheduler: SyncScheduler,
     private val time: TimeSource,
+    private val deviceIds: DeviceIdProvider,
     @param:ApplicationScope private val scope: CoroutineScope,
 ) : AppInitializer {
 
@@ -49,14 +52,15 @@ internal class AccountDataGuard @Inject constructor(
 
     internal suspend fun onSignedIn(userId: String) {
         val owner = syncPreferences.state.first().ownerUserId
+        val today = DayBucketer.dateOf(time.nowMs(), time.zone()).toString()
         when {
-            owner == null -> syncPreferences.adoptOwner(userId)
+            owner == null -> syncPreferences.adoptOwner(userId, deviceIds.deviceIdFor(userId), today)
             owner != userId -> {
                 store.clearForNewOwner()
                 trackingPreferences.reset()
                 // Marks "now" as the earliest moment the usage log may be read for this account.
                 trackingPreferences.setPaused(false, time.nowMs())
-                syncPreferences.switchOwner(userId)
+                syncPreferences.switchOwner(userId, deviceIds.deviceIdFor(userId), today)
             }
         }
         syncScheduler.requestSync()

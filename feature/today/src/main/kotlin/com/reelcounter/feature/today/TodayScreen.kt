@@ -23,7 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -53,8 +56,10 @@ import com.reelcounter.core.designsystem.icon.RcIcons
 import com.reelcounter.core.designsystem.theme.Spacing
 import com.reelcounter.core.domain.tracking.TrackingStatus
 import com.reelcounter.core.model.UserProfile
+import com.reelcounter.core.ui.metric.DayDetail
 import com.reelcounter.core.ui.metric.DaySummary
 import com.reelcounter.core.ui.metric.PlatformActivityRow
+import com.reelcounter.core.ui.metric.daysForAverage
 import com.reelcounter.core.ui.metric.formatAppTime
 import com.reelcounter.core.ui.metric.formatCompactAppTime
 import com.reelcounter.core.ui.metric.formatCount
@@ -112,7 +117,7 @@ internal fun TodayScreen(
             .fillMaxSize()
         when (uiState) {
             TodayUiState.Loading -> TodayLoading(contentModifier)
-            is TodayUiState.NeedsSetup -> TodaySetup(uiState.greetingName, onSetUpTracking, contentModifier)
+            is TodayUiState.NeedsSetup -> TodaySetup(uiState.greetingName, uiState.countingAvailable, onSetUpTracking, contentModifier)
             is TodayUiState.Content -> PullToRefreshBox(
                 isRefreshing = uiState.isRefreshing,
                 onRefresh = onRefresh,
@@ -131,6 +136,9 @@ private fun TodayContent(
     onOpenInsights: () -> Unit,
     onOpenProfile: () -> Unit,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
+    // The day picked in the week chart (index into state.week); null means today. Reset at midnight.
+    var selectedDay by rememberSaveable(state.date) { mutableStateOf<Int?>(null) }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.xxl),
@@ -152,11 +160,22 @@ private fun TodayContent(
                     .padding(top = Spacing.md),
             )
         }
-        item(key = "week") { WeekCard(state.week) }
-        if (state.activities.isNotEmpty()) {
+        item(key = "week") {
+            WeekCard(
+                week = state.week,
+                selectedIndex = selectedDay,
+                onSelectDay = { index -> selectedDay = index.takeUnless { it == state.week.lastIndex || it == selectedDay } },
+            )
+        }
+        // A day picked in the chart shows its own apps; otherwise today's.
+        val pickedDay = selectedDay?.let { state.week.getOrNull(it) }
+        val appActivities = selectedDay?.let { state.weekActivities.getOrNull(it) } ?: state.activities
+        if (appActivities.isNotEmpty()) {
             item(key = "apps-header") {
                 RcSectionHeader(
-                    title = stringResource(R.string.feature_today_by_app_title),
+                    title = pickedDay?.let { day ->
+                        stringResource(R.string.feature_today_by_app_on_day, day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale))
+                    } ?: stringResource(R.string.feature_today_by_app_title),
                     modifier = Modifier
                         .widthIn(max = ContentMaxWidth)
                         .padding(top = Spacing.md),
@@ -164,7 +183,7 @@ private fun TodayContent(
             }
             item(key = "apps") {
                 RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
-                    state.activities.forEachIndexed { index, activity ->
+                    appActivities.forEachIndexed { index, activity ->
                         if (index > 0) RcDivider(startInset = 68.dp)
                         PlatformActivityRow(activity = activity)
                     }
@@ -407,9 +426,12 @@ private fun TrackingStatusPill(status: TrackingStatus) {
     }
 }
 
-/** The last seven days as bars: reel counts when any day has one, otherwise app time. */
+/**
+ * The last seven days as bars: reels when any day has a count, otherwise app time. Tapping a day
+ * shows its figures under the chart (and its apps below the card).
+ */
 @Composable
-private fun WeekCard(week: List<DaySummary>) {
+private fun WeekCard(week: List<DaySummary>, selectedIndex: Int?, onSelectDay: (Int) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val useCounts = week.any { it.count != null }
     val anyEstimate = week.any { it.isEstimate }
@@ -434,8 +456,8 @@ private fun WeekCard(week: List<DaySummary>) {
                 valueLabel = count?.let { formatCount(it) }.orEmpty()
                 description = when {
                     count == null -> stringResource(R.string.feature_today_bar_no_data, fullDate)
-                    day.isEstimate -> stringResource(R.string.feature_today_bar_reels, fullDate, formatCount(count))
-                    else -> stringResource(R.string.feature_today_bar_videos, fullDate, formatCount(count))
+                    day.isEstimate -> pluralStringResource(R.plurals.feature_today_bar_reels, count, fullDate, formatCount(count))
+                    else -> pluralStringResource(R.plurals.feature_today_bar_videos, count, fullDate, formatCount(count))
                 }
             } else {
                 value = day.appTime?.inWholeMinutes?.toFloat()
@@ -445,14 +467,24 @@ private fun WeekCard(week: List<DaySummary>) {
             }
             RcBar(label = dayName, value = value, valueLabel = valueLabel, description = description, highlighted = isToday)
         }
-        RcBarChart(bars = bars, modifier = Modifier.padding(top = Spacing.xs))
+        RcBarChart(
+            bars = bars,
+            modifier = Modifier.padding(top = Spacing.xs),
+            selectedIndex = selectedIndex,
+            onBarClick = onSelectDay,
+        )
+        val picked = selectedIndex?.let { week.getOrNull(it) }
+        if (picked != null) {
+            DayDetail(day = picked, modifier = Modifier.padding(top = Spacing.md))
+        }
 
         Text(
             text = if (daysWithData == 0) {
                 stringResource(R.string.feature_today_week_empty)
             } else {
                 weekSummary(week, useCounts, anyEstimate) + " · " +
-                    stringResource(R.string.feature_today_week_days_with_data, daysWithData)
+                    stringResource(R.string.feature_today_week_days_with_data, daysWithData) +
+                    (if (selectedIndex == null) "\n" + stringResource(CoreUiR.string.core_ui_day_tap_hint) else "")
             },
             modifier = Modifier.padding(top = Spacing.md),
             style = MaterialTheme.typography.bodySmall,
@@ -461,24 +493,32 @@ private fun WeekCard(week: List<DaySummary>) {
     }
 }
 
-/** The average over days that have data. Days without data are left out rather than counted as zero. */
+/**
+ * The average over completed days that have data. Days without data are left out rather than
+ * counted as zero, and today counts only once it's over (see [daysForAverage]).
+ */
 @Composable
 private fun weekSummary(week: List<DaySummary>, useCounts: Boolean, anyEstimate: Boolean): String =
     if (useCounts) {
-        val counts = week.mapNotNull { it.count }
+        val counts = week.daysForAverage { it.count != null }.mapNotNull { it.count }
         val average = counts.sum() / counts.size
         stringResource(
             if (anyEstimate) R.string.feature_today_week_average_reels else R.string.feature_today_week_average_videos,
             formatCount(average),
         )
     } else {
-        val times = week.mapNotNull { it.appTime }
+        val times = week.daysForAverage { it.appTime != null }.mapNotNull { it.appTime }
         val average = times.fold(Duration.ZERO, Duration::plus) / times.size
         stringResource(R.string.feature_today_week_average_time, formatAppTime(average))
     }
 
 @Composable
-private fun TodaySetup(greetingName: String?, onSetUpTracking: () -> Unit, modifier: Modifier) {
+private fun TodaySetup(
+    greetingName: String?,
+    countingAvailable: Boolean,
+    onSetUpTracking: () -> Unit,
+    modifier: Modifier,
+) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(start = Spacing.screen, end = Spacing.screen, bottom = Spacing.xxl),
@@ -518,7 +558,12 @@ private fun TodaySetup(greetingName: String?, onSetUpTracking: () -> Unit, modif
                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
                     SetupPoint(RcIcons.AppTime, stringResource(R.string.feature_today_setup_point_time))
-                    SetupPoint(RcIcons.Reels, stringResource(R.string.feature_today_setup_point_estimates))
+                    SetupPoint(
+                        RcIcons.Reels,
+                        stringResource(
+                            if (countingAvailable) R.string.feature_today_setup_point_estimates else R.string.feature_today_setup_point_estimates_only,
+                        ),
+                    )
                     SetupPoint(RcIcons.Paused, stringResource(R.string.feature_today_setup_point_control))
                 }
                 RcButton(

@@ -10,6 +10,8 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserSession
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -87,6 +89,34 @@ internal class SupabaseAuthRemoteDataSource @Inject constructor(
             // Signing out must work offline too: drop the local session even if the server call failed.
             if (auth.currentSessionOrNull() != null) auth.clearSession()
         }
+    }
+
+    override suspend fun deleteAccount() = remoteCall {
+        val userId = auth.currentUserOrNull()?.id
+        val avatars = client.get().storage.from(AVATAR_BUCKET)
+        // Storage files can't be deleted with SQL, so the app removes the profile photos itself:
+        // listed before, removed after the account is gone (the session is still accepted for
+        // that). If the server can't delete the account, nothing has been touched.
+        val photos = userId?.let { id ->
+            try {
+                avatars.list(id).map { "$id/${it.name}" }
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }.orEmpty()
+        client.get().postgrest.rpc("delete_my_account")
+        if (photos.isNotEmpty()) {
+            try {
+                avatars.delete(photos)
+            } catch (_: Exception) {
+                // Best effort: without the profile nothing links to them any more.
+            }
+        }
+        auth.clearSession()
+    }
+
+    private companion object {
+        const val AVATAR_BUCKET = "avatars"
     }
 }
 

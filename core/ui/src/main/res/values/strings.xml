@@ -53,4 +53,6 @@
     <string name="core_ui_unavailable_app_not_installed">App isn\'t installed on this device</string>
     <string name="core_ui_unavailable_coverage_gap">No data was recorded for this period</string>
     <string name="core_ui_unavailable_not_observable">Web and other-device use can\'t be measured</string>
+    <string name="core_ui_day_no_data">No data for this day</string>
+    <string name="core_ui_day_tap_hint">Tap a day to see its figures.</string>
 </resources>

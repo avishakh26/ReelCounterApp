@@ -56,6 +56,8 @@ data class ProfileEditorUiState(
     val error: ProfileError? = null,
     /** Set once after a successful save; the edit screen closes and clears it. */
     val saved: Boolean = false,
+    /** Something differs from the saved profile, so leaving should ask first. */
+    val hasUnsavedChanges: Boolean = false,
 ) {
     val canSave: Boolean
         get() = !isLoading && !isSaving && !isProcessingAvatar && usernameStatus in savableStatuses
@@ -82,12 +84,16 @@ class ProfileEditorViewModel @Inject constructor(
 
     private val usernameToCheck = MutableStateFlow<String?>(null)
     private var originalUsername: String? = null
+    private var originalDisplayName = ""
+    private var originalBio = ""
     private var newAvatar: AvatarImage? = null
 
     init {
         viewModelScope.launch {
             val profile = profileRepository.profileState.filterIsInstance<ProfileState.Loaded>().first().profile
             originalUsername = profile.username
+            originalDisplayName = profile.displayName.orEmpty()
+            originalBio = profile.bio.orEmpty()
             _uiState.update {
                 it.copy(
                     isLoading = false,
@@ -116,14 +122,15 @@ class ProfileEditorViewModel @Inject constructor(
             username == originalUsername -> UsernameStatus.Unchanged
             else -> UsernameStatus.Checking
         }
-        _uiState.update { it.copy(username = username, usernameStatus = status, error = null) }
+        _uiState.update { it.copy(username = username, usernameStatus = status, error = null).withChangeFlag() }
         usernameToCheck.value = username.takeIf { status == UsernameStatus.Checking }
     }
 
     fun onDisplayNameChange(input: String) =
-        _uiState.update { it.copy(displayName = input.take(ProfileTextRules.DISPLAY_NAME_MAX), error = null) }
+        _uiState.update { it.copy(displayName = input.take(ProfileTextRules.DISPLAY_NAME_MAX), error = null).withChangeFlag() }
 
-    fun onBioChange(input: String) = _uiState.update { it.copy(bio = input.take(ProfileTextRules.BIO_MAX), error = null) }
+    fun onBioChange(input: String) =
+        _uiState.update { it.copy(bio = input.take(ProfileTextRules.BIO_MAX), error = null).withChangeFlag() }
 
     /** [uri] is the content URI returned by the photo picker. */
     fun onAvatarPicked(uri: String) {
@@ -132,7 +139,7 @@ class ProfileEditorViewModel @Inject constructor(
             when (val result = avatarImageProcessor.process(uri)) {
                 is Outcome.Success -> {
                     newAvatar = result.value
-                    _uiState.update { it.copy(isProcessingAvatar = false, avatar = result.value.bytes) }
+                    _uiState.update { it.copy(isProcessingAvatar = false, avatar = result.value.bytes).withChangeFlag() }
                 }
                 is Outcome.Failure -> _uiState.update { it.copy(isProcessingAvatar = false, error = result.error) }
             }
@@ -173,6 +180,13 @@ class ProfileEditorViewModel @Inject constructor(
     }
 
     fun onSavedHandled() = _uiState.update { it.copy(saved = false) }
+
+    private fun ProfileEditorUiState.withChangeFlag() = copy(
+        hasUnsavedChanges = username != originalUsername.orEmpty() ||
+            displayName != originalDisplayName ||
+            bio != originalBio ||
+            newAvatar != null,
+    )
 
     /** Offered during first-run setup, in case the user signed in with the wrong account. */
     fun signOut() {

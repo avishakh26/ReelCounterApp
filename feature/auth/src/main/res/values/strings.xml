@@ -14,7 +14,8 @@
 
     <!-- Sign up -->
     <string name="feature_auth_sign_up_title">Create your account</string>
-    <string name="feature_auth_sign_up_subtitle">We\'ll email you a code to confirm it\'s you.</string>
+    <string name="feature_auth_sign_up_subtitle">One account works on Android and iPhone. If your email needs confirming, we\'ll send you a code.</string>
+    <string name="feature_auth_error_server_outdated">This isn\'t available yet: the ReelCounter server needs its latest database update.</string>
     <string name="feature_auth_sign_up_action">Create account</string>
     <string name="feature_auth_have_account">I already have an account</string>
     <plurals name="feature_auth_password_hint">

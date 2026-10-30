@@ -32,7 +32,11 @@ sealed interface TodayUiState {
     data object Loading : TodayUiState
 
     /** Tracking has never been set up (or the disclosure needs accepting). */
-    data class NeedsSetup(val greetingName: String? = null) : TodayUiState
+    data class NeedsSetup(
+        val greetingName: String? = null,
+        /** This build can count reels one by one (it includes the accessibility service). */
+        val countingAvailable: Boolean = true,
+    ) : TodayUiState
 
     data class Content(
         val date: LocalDate,
@@ -48,6 +52,8 @@ sealed interface TodayUiState {
         val yesterday: DaySummary? = null,
         /** The seven days ending today, oldest first. Days without data have null figures. */
         val week: List<DaySummary> = emptyList(),
+        /** Each day of [week]'s per-app figures, in the same order, for looking back at a day. */
+        val weekActivities: List<List<DailyPlatformActivity>> = emptyList(),
         val profile: UserProfile? = null,
         /** Reels are counted one by one (accessibility service on) rather than estimated. */
         val countingEnabled: Boolean = false,
@@ -67,6 +73,8 @@ class TodayViewModel @Inject constructor(
     countingStatus: ReelCountingStatus,
 ) : ViewModel() {
 
+    private val countingAvailable = countingStatus.isAvailable
+
     private val isRefreshing = MutableStateFlow(false)
 
     // A new date at midnight switches to the new day's (empty) figures without a restart.
@@ -76,8 +84,8 @@ class TodayViewModel @Inject constructor(
 
     // The week shown under the headline. Each day is observed separately, so a recalculated
     // day (for example after changing estimation settings) updates the chart in place.
-    private val week: Flow<List<DaySummary>> = currentDateProvider.today.flatMapLatest { today ->
-        combine(daysEnding(today).map { day -> trackingRepository.observeDay(day).map { it.summarize(day) } }) { it.toList() }
+    private val week: Flow<List<List<DailyPlatformActivity>>> = currentDateProvider.today.flatMapLatest { today ->
+        combine(daysEnding(today).map { day -> trackingRepository.observeDay(day) }) { it.toList() }
     }
 
     private val profile: Flow<UserProfile?> = profileRepository.profileState
@@ -107,15 +115,16 @@ class TodayViewModel @Inject constructor(
         }
     }
 
-    val uiState: StateFlow<TodayUiState> = combine(baseState, week, profile, countingStatus.isEnabled) { state, week, profile, counting ->
+    val uiState: StateFlow<TodayUiState> = combine(baseState, week, profile, countingStatus.isEnabled) { state, weekDays, profile, counting ->
         when (state) {
             is TodayUiState.Content -> state.copy(
-                week = week,
-                yesterday = week.getOrNull(week.lastIndex - 1),
+                week = daysEnding(state.date).zip(weekDays) { day, activities -> activities.summarize(day) },
+                weekActivities = weekDays,
+                yesterday = weekDays.getOrNull(weekDays.lastIndex - 1)?.summarize(state.date.minusDays(1)),
                 profile = profile,
                 countingEnabled = counting,
             )
-            is TodayUiState.NeedsSetup -> state.copy(greetingName = profile?.greetingName())
+            is TodayUiState.NeedsSetup -> state.copy(greetingName = profile?.greetingName(), countingAvailable = countingAvailable)
             TodayUiState.Loading -> state
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState.Loading)

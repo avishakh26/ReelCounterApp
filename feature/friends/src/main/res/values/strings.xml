@@ -89,8 +89,15 @@
     <string name="feature_friends_detail_empty_message">%1$s hasn\'t shared any activity in the last 7 days. They may not have set up tracking, or they show their activity only to themselves.</string>
     <string name="feature_friends_detail_not_friends_title">You\'re not friends any more</string>
     <string name="feature_friends_detail_not_friends_message">Only friends can see each other\'s activity.</string>
-    <string name="feature_friends_bar_reels">%1$s: about %2$s reels</string>
-    <string name="feature_friends_bar_videos">%1$s: %2$s reels</string>
+    <string name="feature_friends_error_server_outdated">This isn\'t available yet: the ReelCounter server needs its latest database update.</string>
     <string name="feature_friends_bar_time">%1$s: %2$s app time</string>
     <string name="feature_friends_bar_no_data">%1$s: no data</string>
+    <plurals name="feature_friends_bar_reels">
+        <item quantity="one">%1$s: about %2$s reel</item>
+        <item quantity="other">%1$s: about %2$s reels</item>
+    </plurals>
+    <plurals name="feature_friends_bar_videos">
+        <item quantity="one">%1$s: %2$s reel</item>
+        <item quantity="other">%1$s: %2$s reels</item>
+    </plurals>
 </resources>

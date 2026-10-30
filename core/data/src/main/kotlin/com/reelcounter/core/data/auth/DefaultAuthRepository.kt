@@ -105,6 +105,13 @@ internal class DefaultAuthRepository @Inject constructor(
         }
     }
 
+    override suspend fun deleteAccount(): Outcome<Unit, AuthError> = withContext(NonCancellable) {
+        call {
+            remote.deleteAccount()
+            passwordResetFlag.set(false)
+        }
+    }
+
     private suspend fun <T> call(block: suspend () -> T): Outcome<T, AuthError> {
         if (!config.isConfigured) return Outcome.Failure(AuthError.NotConfigured)
         return try {

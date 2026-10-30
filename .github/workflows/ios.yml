@@ -1,0 +1,166 @@
+name: iOS
+
+on:
+  # "Run workflow" on the Actions tab rebuilds everything, e.g. the free .ipa after changing secrets.
+  workflow_dispatch:
+  push:
+    branches: [main, ios-app]
+    paths: ['ios/**', '.github/workflows/ios.yml']
+  pull_request:
+    paths: ['ios/**', '.github/workflows/ios.yml']
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core logic tests
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: swift test
+        run: |
+          set -o pipefail
+          swift test --package-path ios/ReelCounterCore 2>&1 | tee core.log
+
+      # Errors become one annotation, readable without signing in to GitHub.
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh core.log
+
+  app:
+    name: App build (simulator)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      # No signing and no real Supabase keys: the build uses the committed placeholders.
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild -version
+          xcodebuild build \
+            -project ios/ReelCounter.xcodeproj \
+            -scheme ReelCounter \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee app.log | grep -E "error:|warning: .*deprecated|BUILD" || true
+          grep -q "BUILD SUCCEEDED" app.log
+
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh app.log
+
+  screenshots:
+    name: Screenshots
+    runs-on: macos-latest
+    timeout-minutes: 45
+    # Publishing needs write access; only on pushes to this repository's branches.
+    if: github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Render screens on a simulator
+        run: |
+          set -o pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          runtimes = json.load(sys.stdin)['devices']
+          ios = sorted(k for k in runtimes if 'iOS' in k and any(d['name'].startswith('iPhone') for d in runtimes[k]))
+          print(next(d['udid'] for d in runtimes[ios[-1]] if d['name'].startswith('iPhone')))")
+          mkdir -p "$PWD/screenshots"
+          TEST_RUNNER_SNAPSHOT_DIR="$PWD/screenshots" xcodebuild test \
+            -project ios/ReelCounter.xcodeproj \
+            -scheme ReelCounter \
+            -destination "id=$DEVICE" \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee test.log | grep -E "error:|Test Case|TEST" || true
+          ls screenshots
+          test -n "$(ls screenshots)"
+
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh test.log
+
+      # Screenshots go to their own branch so they can be viewed without signing in.
+      - name: Publish to the ios-screenshots branch
+        run: |
+          cd screenshots
+          git init -q -b ios-screenshots
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Screenshots for ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ios-screenshots
+
+  # The free edition as an unsigned .ipa, for installing with a free Apple ID (e.g. with
+  # Sideloadly, which signs it). Attached to the run as an artifact: download it from the run's
+  # page on GitHub while signed in.
+  free-ipa:
+    name: Free edition (.ipa)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The backend address comes from repository secrets; without them the app shows
+      # "backend not configured".
+      - name: Configure the backend
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::warning title=Backend not set::Add the SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY repository secrets so the free .ipa connects to Supabase."
+            exit 0
+          fi
+          case "$SUPABASE_PUBLISHABLE_KEY" in sb_secret_*) echo "::error::That is a secret key. Use the publishable key."; exit 1;; esac
+          printf 'SUPABASE_URL = %s\nSUPABASE_PUBLISHABLE_KEY = %s\n' "${SUPABASE_URL/:\/\//:\/\$()\/}" "$SUPABASE_PUBLISHABLE_KEY" > ios/Config/Secrets.xcconfig
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          cd ios && xcodegen generate
+
+      - name: Build for iPhone (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project ios/ReelCounter.xcodeproj \
+            -scheme ReelCounterFree \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee free.log | grep -E "error:|BUILD" || true
+          grep -q "BUILD SUCCEEDED" free.log
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/ReelCounterFree.app Payload/
+          zip -qry ReelCounter-free.ipa Payload
+          ls -la ReelCounter-free.ipa
+
+      - name: Report errors
+        if: failure()
+        run: ios/ci/annotate-errors.sh free.log
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReelCounter-free-ipa
+          path: ReelCounter-free.ipa
+          if-no-files-found: error

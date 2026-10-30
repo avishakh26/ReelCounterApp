@@ -1,7 +1,6 @@
 package com.reelcounter.feature.friends.detail
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,9 +13,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +46,7 @@ import com.reelcounter.core.designsystem.component.RcTone
 import com.reelcounter.core.designsystem.component.RcTopAppBar
 import com.reelcounter.core.designsystem.icon.RcIcons
 import com.reelcounter.core.designsystem.theme.Spacing
+import com.reelcounter.core.ui.metric.DayDetail
 import com.reelcounter.core.ui.metric.DaySummary
 import com.reelcounter.core.ui.metric.PlatformActivityRow
 import com.reelcounter.core.ui.metric.formatAppTime
@@ -61,18 +64,21 @@ internal fun FriendDetailScreen(
     viewModel: FriendDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     // Their phone may have synced while this screen was in the background.
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         onPauseOrDispose { }
     }
-    FriendDetailScreen(uiState = uiState, onBack = onBack)
+    FriendDetailScreen(uiState = uiState, isRefreshing = isRefreshing, onRefresh = viewModel::pullToRefresh, onBack = onBack)
 }
 
 @Composable
 internal fun FriendDetailScreen(
     uiState: FriendDetailUiState,
     onBack: () -> Unit,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -95,8 +101,12 @@ internal fun FriendDetailScreen(
                 icon = RcIcons.Friends,
                 modifier = modifier,
             )
-            // Figures refresh live and whenever the screen resumes, so there's no pull-to-refresh.
-            is FriendDetailUiState.Content -> Box(modifier = modifier) { FriendContent(uiState) }
+            // Figures also refresh live and whenever the screen resumes.
+            is FriendDetailUiState.Content -> PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier,
+            ) { FriendContent(uiState) }
         }
     }
 }
@@ -287,6 +297,7 @@ private fun Stat(icon: ImageVector, label: String, value: String, modifier: Modi
 @Composable
 private fun WeekCard(week: List<DaySummary>) {
     val locale = LocalConfiguration.current.locales[0]
+    var selectedDay by rememberSaveable(week.lastOrNull()?.date) { mutableStateOf<Int?>(null) }
     val useCounts = week.any { it.count != null }
     RcCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth(), mergeSemantics = false) {
         val bars = week.mapIndexed { index, day ->
@@ -301,8 +312,8 @@ private fun WeekCard(week: List<DaySummary>) {
                     valueLabel = count?.let { formatCount(it) }.orEmpty(),
                     description = when {
                         count == null -> stringResource(R.string.feature_friends_bar_no_data, fullDate)
-                        day.isEstimate -> stringResource(R.string.feature_friends_bar_reels, fullDate, formatCount(count))
-                        else -> stringResource(R.string.feature_friends_bar_videos, fullDate, formatCount(count))
+                        day.isEstimate -> pluralStringResource(R.plurals.feature_friends_bar_reels, count, fullDate, formatCount(count))
+                        else -> pluralStringResource(R.plurals.feature_friends_bar_videos, count, fullDate, formatCount(count))
                     },
                     highlighted = index == week.lastIndex,
                 )
@@ -317,7 +328,22 @@ private fun WeekCard(week: List<DaySummary>) {
                 )
             }
         }
-        RcBarChart(bars = bars)
+        RcBarChart(
+            bars = bars,
+            selectedIndex = selectedDay,
+            onBarClick = { index -> selectedDay = index.takeUnless { it == selectedDay } },
+        )
+        val picked = selectedDay?.let { week.getOrNull(it) }
+        if (picked != null) {
+            DayDetail(day = picked, modifier = Modifier.padding(top = Spacing.md))
+        } else {
+            Text(
+                text = stringResource(CoreUiR.string.core_ui_day_tap_hint),
+                modifier = Modifier.padding(top = Spacing.md),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

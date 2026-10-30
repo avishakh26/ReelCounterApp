@@ -5,6 +5,7 @@ import com.reelcounter.core.datastore.SyncState
 import com.reelcounter.core.datastore.TrackingPreferences
 import com.reelcounter.core.datastore.TrackingPreferencesStore
 import com.reelcounter.core.domain.tracking.CURRENT_DISCLOSURE_VERSION
+import com.reelcounter.core.domain.tracking.DeviceIdProvider
 import com.reelcounter.core.domain.tracking.InstalledApps
 import com.reelcounter.core.domain.tracking.TimeSource
 import com.reelcounter.core.domain.tracking.UsageAccessMonitor
@@ -186,14 +187,16 @@ internal class FakeTrackingPreferences(
 internal class FakeSyncPreferences(initial: SyncState = SyncState()) : SyncPreferencesStore {
     val current = MutableStateFlow(initial)
     override val state: Flow<SyncState> = current
-    private var counter = 0
-
-    override suspend fun adoptOwner(userId: String) {
-        current.value = current.value.copy(ownerUserId = userId, deviceId = current.value.deviceId ?: "device-${++counter}")
+    override suspend fun adoptOwner(userId: String, deviceId: String, coverageStartDate: String) {
+        current.value = current.value.copy(
+            ownerUserId = userId,
+            deviceId = current.value.deviceId ?: deviceId,
+            coverageStartDate = current.value.coverageStartDate ?: coverageStartDate,
+        )
     }
 
-    override suspend fun switchOwner(userId: String) {
-        current.value = SyncState(ownerUserId = userId, deviceId = "device-${++counter}", deviceRegistered = false)
+    override suspend fun switchOwner(userId: String, deviceId: String, coverageStartDate: String) {
+        current.value = SyncState(ownerUserId = userId, deviceId = deviceId, deviceRegistered = false, coverageStartDate = coverageStartDate)
     }
 
     override suspend fun setDeviceRegistered(registered: Boolean) {
@@ -208,6 +211,11 @@ internal class FakeSyncPreferences(initial: SyncState = SyncState()) : SyncPrefe
 internal class FakeTimeSource(var nowMs: Long, var zone: ZoneId) : TimeSource {
     override fun nowMs() = nowMs
     override fun zone() = zone
+}
+
+/** Like the real one: the same id for the same account on this phone, a different one per account. */
+internal class FakeDeviceIds : DeviceIdProvider {
+    override fun deviceIdFor(userId: String) = "phone-1:$userId"
 }
 
 internal class FakeInstalledApps(private val installed: Boolean = true) : InstalledApps {

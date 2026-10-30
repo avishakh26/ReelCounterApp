@@ -29,6 +29,12 @@ interface AuthRepository {
     suspend fun completePasswordReset(newPassword: String): Outcome<Unit, AuthError>
 
     suspend fun signOut()
+
+    /**
+     * Permanently deletes the account and everything stored with it (profile, photos, friends, daily
+     * figures) on the server, then signs out. Required by Google Play and the App Store.
+     */
+    suspend fun deleteAccount(): Outcome<Unit, AuthError>
 }
 
 sealed interface AuthState {
@@ -65,5 +71,8 @@ sealed interface AuthError {
     data object SignUpDisabled : AuthError
     data object Network : AuthError
     data object NotConfigured : AuthError
+
+    /** The server is missing a newer database update (a function or column this needs). */
+    data object ServerOutdated : AuthError
     data class Unknown(val code: String?) : AuthError
 }

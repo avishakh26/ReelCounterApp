@@ -158,7 +158,11 @@ private fun ColumnScope.DisclosureStep(
                 (RcIcons.Reels to R.string.feature_tracking_disclosure_counting).takeIf { countingAvailable },
                 RcIcons.Synced to R.string.feature_tracking_disclosure_storage,
                 RcIcons.Friends to R.string.feature_tracking_disclosure_sharing,
-                RcIcons.Estimated to R.string.feature_tracking_disclosure_estimates,
+                RcIcons.Estimated to if (countingAvailable) {
+                    R.string.feature_tracking_disclosure_estimates
+                } else {
+                    R.string.feature_tracking_disclosure_estimates_only
+                },
                 RcIcons.Paused to R.string.feature_tracking_disclosure_control,
             ).forEach { (icon, text) -> Point(icon, stringResource(text)) }
         }

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
@@ -69,6 +70,12 @@ class FriendDetailViewModel @Inject constructor(
     private val userId = savedStateHandle.toRoute<FriendDetailRoute>().userId
     private val days = MutableStateFlow<Pair<LocalDate, List<DailyPlatformActivity>>?>(null)
     private val reload = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private var currentDay: LocalDate? = null
+
+    private val _isRefreshing = MutableStateFlow(false)
+
+    /** A pull-to-refresh is running. */
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     val uiState: StateFlow<FriendDetailUiState> = combine(
         friendsRepository.connections,
@@ -97,15 +104,30 @@ class FriendDetailViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             currentDateProvider.today.collectLatest { today ->
+                currentDay = today
                 load(today)
                 merge(activityRepository.changes.filter { it == userId }.map { }, reload).collect { load(today) }
             }
         }
     }
 
-    /** Re-reads the figures, e.g. on pull-to-refresh or when the screen resumes. */
+    /** Re-reads the figures, e.g. when the screen resumes. */
     fun refresh() {
         reload.tryEmit(Unit)
+    }
+
+    /** Pull-to-refresh: re-reads the figures and shows the spinner until they're in. */
+    fun pullToRefresh() {
+        val today = currentDay ?: return
+        if (_isRefreshing.value) return
+        _isRefreshing.value = true
+        viewModelScope.launch {
+            try {
+                load(today)
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 
     private suspend fun load(today: LocalDate) {

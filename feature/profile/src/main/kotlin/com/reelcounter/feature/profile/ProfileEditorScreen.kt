@@ -1,5 +1,6 @@
 package com.reelcounter.feature.profile
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -39,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.reelcounter.core.designsystem.component.RcAlertDialog
 import com.reelcounter.core.designsystem.component.RcBanner
 import com.reelcounter.core.designsystem.component.RcButton
 import com.reelcounter.core.designsystem.component.RcLoadingIndicator
@@ -84,6 +89,25 @@ internal fun ProfileEditorScreen(
         }
     }
 
+    // Leaving with unsaved edits asks first, for both the top-bar arrow and the system Back.
+    var confirmDiscard by rememberSaveable { mutableStateOf(false) }
+    val requestBack = { if (uiState.hasUnsavedChanges) confirmDiscard = true else onBack() }
+    BackHandler(enabled = mode == ProfileEditorMode.Edit && uiState.hasUnsavedChanges) { confirmDiscard = true }
+    if (confirmDiscard) {
+        RcAlertDialog(
+            title = stringResource(R.string.feature_profile_discard_title),
+            text = stringResource(R.string.feature_profile_discard_message),
+            confirmText = stringResource(R.string.feature_profile_discard_confirm),
+            dismissText = stringResource(R.string.feature_profile_discard_keep),
+            isDestructive = true,
+            onConfirm = {
+                confirmDiscard = false
+                onBack()
+            },
+            onDismiss = { confirmDiscard = false },
+        )
+    }
+
     ProfileEditorScreen(
         mode = mode,
         uiState = uiState,
@@ -94,7 +118,7 @@ internal fun ProfileEditorScreen(
             pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         },
         onSave = viewModel::save,
-        onBack = onBack,
+        onBack = requestBack,
         onSignOut = viewModel::signOut,
         modifier = modifier,
     )

@@ -620,6 +620,7 @@ private fun messageText(message: FriendsMessage): String = stringResource(
 private fun errorText(error: SocialError): Int = when (error) {
     SocialError.Network -> R.string.feature_friends_error_network
     SocialError.RateLimited -> R.string.feature_friends_error_rate_limited
+    SocialError.ServerOutdated -> R.string.feature_friends_error_server_outdated
     SocialError.NotSignedIn, is SocialError.Unknown -> R.string.feature_friends_error_unknown
 }
 

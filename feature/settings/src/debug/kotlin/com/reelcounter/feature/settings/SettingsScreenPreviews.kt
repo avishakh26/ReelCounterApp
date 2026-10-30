@@ -11,6 +11,9 @@ import com.reelcounter.core.preview.PreviewTheme
 private fun SettingsScreenPreview() = PreviewTheme {
     SettingsScreen(
         profile = UserProfile(id = "1", username = "sam.k", displayName = "Sam Kim", bio = null, avatarUrl = null),
+        deletion = AccountDeletion.Idle,
+        onDeleteAccount = {},
+        onDismissDeletionError = {},
         onEditProfileClick = {},
         onTrackingClick = {},
         onPrivacyClick = {},

@@ -1,6 +1,7 @@
 package com.reelcounter.core.data.social
 
 import com.reelcounter.core.common.dispatchers.ApplicationScope
+import com.reelcounter.core.data.error.isServerOutdated
 import com.reelcounter.core.domain.Outcome
 import com.reelcounter.core.domain.auth.AuthRepository
 import com.reelcounter.core.domain.auth.AuthState
@@ -102,7 +103,7 @@ internal fun RemoteException.toSocialError(): SocialError = when (kind) {
     RemoteException.Kind.Database -> when (code) {
         "RC002" -> SocialError.RateLimited // private.consume_rate_limit
         "42501" -> SocialError.NotSignedIn
-        else -> SocialError.Unknown(code)
+        else -> if (isServerOutdated()) SocialError.ServerOutdated else SocialError.Unknown(code)
     }
     RemoteException.Kind.Auth, RemoteException.Kind.Server, RemoteException.Kind.Unknown -> SocialError.Unknown(code)
 }

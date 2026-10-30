@@ -46,7 +46,7 @@ enum class RefreshResult { Updated, NotPermitted, Paused, DeviceLocked }
  *  2 (Phase 5): daily totals also saved to the user's account.
  *  3: optional reel counting with an accessibility service.
  */
-const val CURRENT_DISCLOSURE_VERSION = 3
+const val CURRENT_DISCLOSURE_VERSION = 4
 
 /** Daily totals are uploaded only for users who agreed to a disclosure that says so. */
 const val UPLOAD_CONSENT_VERSION = 2
@@ -80,6 +80,15 @@ interface UsageAccessMonitor {
     val isGranted: Flow<Boolean>
 
     fun isGrantedNow(): Boolean
+}
+
+/**
+ * The id this phone uploads its daily rows under for [userId]. The same on every install of the app
+ * on this phone, so a reinstall overwrites its earlier rows instead of adding a second copy that
+ * friends would see summed. Different per account, and not a hardware identifier itself.
+ */
+interface DeviceIdProvider {
+    fun deviceIdFor(userId: String): String
 }
 
 interface InstalledApps {

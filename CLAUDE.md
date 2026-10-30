@@ -144,8 +144,88 @@ Design system in `core/designsystem` (all screens use it; no hard-coded colors o
 - Emulator limits: its YouTube (19.17) is outdated and can't load Shorts; other apps not installed.
   `uiautomator dump` unbinds accessibility services: never use it while testing counting.
 
-## 9. Other files made for the user
+## 9. iPhone app (IN PROGRESS, branch `ios-app`, 2026-10-29)
+
+The user asked for an iPhone version; chose a native SwiftUI app, has **no Mac** and **no Apple
+Developer account yet**. Everything is in `ios/` (see `ios/README.md`), developed on branch `ios-app`
+(not merged to `main`).
+- Built and tested only on GitHub Actions macOS runners (`.github/workflows/ios.yml`): job "Core logic
+  tests" (`swift test` on `ios/ReelCounterCore`) and "App build (simulator)" (XcodeGen + xcodebuild,
+  no signing). Errors are turned into one check-run annotation by `ios/ci/annotate-errors.sh`, readable
+  without login: `curl .../actions/runs?head_sha=<sha>` → jobs → `check-runs/<id>/annotations`.
+- Same Supabase backend and account as Android. iOS can't read other apps' usage directly: Screen Time
+  (FamilyControls + DeviceActivity). The user picks each platform's app in Apple's picker; one
+  DeviceActivity schedule per platform with threshold events (`UsageThresholds`, 45 steps up to 10 h);
+  the `ReelCounterMonitor` extension records the highest step per day/platform in App Group
+  `group.com.reelcounter.app` (`UsageStore`). The app estimates with Android's formula and uploads
+  `daily_activity_summaries` rows (source `usage_stats`, quality ESTIMATED, session_count 0) on open and
+  via BGAppRefresh. No per-video counting on iPhone.
+- Secrets: `ios/Config/Secrets.xcconfig` (git-ignored, hosted values) overrides `App.xcconfig` placeholders.
+- New migration `supabase/migrations/20261029140000_delete_account.sql` (`delete_my_account()`): Apple
+  requires in-app account deletion. Not applied anywhere yet.
+- To ship: Apple Developer Program, Family Controls (Distribution) entitlement request for both bundle
+  ids (`com.reelcounter.app`, `.monitor`), App Group, then TestFlight via CI. Screen Time only works on
+  a real iPhone, never the simulator.
+- Design review without a Mac: job "Screenshots" runs `ios/ReelCounterTests/ScreenshotTests.swift` on a
+  simulator (windows must use the host app's `UIWindowScene`, else images are blank) and force-pushes the
+  PNGs to branch `ios-screenshots`; fetch them from raw.githubusercontent.com. Fixtures are test-only;
+  `seedForScreenshots` hooks in FriendsStore/SessionStore are `#if DEBUG`. All 10 screens reviewed light/dark.
+- **Free edition** (user has no paid account): target `ReelCounterFree`, flag `FREE_EDITION`, no
+  entitlements/extension; `TrackingStore.Status.unavailable` + `TrackingUnavailableNotice`. CI job
+  "Free edition (.ipa)" uploads artifact `ReelCounter-free-ipa` (private to signed-in users). Publishing it as a
+  public GitHub release was blocked by the permission check: ask the user before making it public.
+  Needs repo secrets `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (user adds them). Sideloadly + free Apple ID, 7-day expiry.
+- Also on this branch: `gradlew` marked executable (Android CI on `main` failed with exit 126 without it),
+  and Android **Delete account** (Settings → Account; `AuthRepository.deleteAccount` → avatar files, then
+  `delete_my_account` RPC; Google Play requires it). DB tests for it in `supabase/tests/pglite/run.mjs`
+  (142 pass). Android: 166 unit tests pass with `-PwarningsAsErrors=true`.
+
+## 10. Bug-hunt fixes (2026-10-30, branch `ios-app`)
+
+QA on the emulator (local backend, two accounts) plus probing the hosted project found 10 bugs; all fixed:
+- **Hosted Supabase was missing migrations 20261029120000/130000/140000** (+ new 20261030120000). One paste
+  file `hosted-update.sql` (generated from those migrations; `supabase/tests/pglite/hosted-update-check.mjs`
+  checks it applies in one go on a hosted-setup.sql database). The user still has to run it.
+- App now degrades on an outdated server: friends' totals retry without `counted_reels` on SQLSTATE 42703
+  (`SupabaseFriendActivityRemoteDataSource`); PGRST202/42883/42703 map to `SocialError.ServerOutdated` /
+  `AuthError.ServerOutdated` with "needs its latest database update" messages.
+- Delete account: delete_my_account first, then remove avatar files (session still accepted). Verified the
+  photo can be removed after the user row is gone. **iOS `SessionStore.deleteAccount` still deletes the photo
+  first** (user said to leave iOS for now).
+- New migration `20261030120000_privacy_change_notify.sql`: changing activity_visibility/stealth_mode sends
+  `activity` to friends, so open friend pages update live. FriendDetail has working pull-to-refresh again.
+- Daily averages leave out today until it's over (`daysForAverage` in core/ui), unless today is the only day.
+- Profile editor asks "Discard changes?" when leaving with edits (`hasUnsavedChanges`).
+- `UsageIngestor` takes `InstalledApps`: no zero rows for tracked apps that aren't installed (shown as
+  "App isn't installed" instead of "≈ 0"); time recorded before uninstalling is kept.
+- No reel-counting promises in builds without the service (Today setup card, disclosure); sign-up subtitle no
+  longer promises an emailed code; "about 1 reel" plurals in chart labels.
+- Android: 170 unit tests pass with -PwarningsAsErrors=true; DB tests 144 pass.
+
+## 11. History and week charts (2026-10-31, branch `ios-app`)
+
+User: previous days' reels weren't visible (only today, "1 of 7 days with data"). Causes and fixes:
+- `UsageIngestor.BACKFILL_DAYS` 1 → 6: a first read (fresh install) reads the past week of Android usage
+  history. Disclosure text says "past week"; `CURRENT_DISCLOSURE_VERSION` 3 → 4 (everyone re-accepts).
+- Stable device id per phone + account: `DeviceIdProvider` (core:domain) → `AndroidDeviceIdProvider`
+  (core:tracking): UUID.nameUUIDFromBytes("reelcounter-device:" + ANDROID_ID + ":" + userId), random if no
+  ANDROID_ID. A reinstall upserts over its earlier rows instead of adding a second device (friends saw sums).
+  `SyncPreferencesStore.adoptOwner/switchOwner(userId, deviceId, coverageStartDate)`.
+- `SyncState.coverageStartDate` (day this install began): `ActivitySyncer` skips uploading read-back days
+  (before it) that the server already has from another device id (`daysFromOtherDevices`), so rows from
+  installs before this change aren't doubled. Days since the install are always uploaded.
+- `AccountHistory` (core:data): own `daily_activity_totals` for 14 days, refreshed with
+  `TrackingRepository.refresh()`; `observeDay` shows them for days with no local rows (local always wins).
+- `RcBarChart`: a number over every bar with data; `selectedIndex`/`onBarClick`. `DayDetail` (core/ui)
+  shows a picked day's reels/range/app time under the chart on Today, Insights and friend pages. Today's
+  "By app" switches to the picked day ("By app on Thursday"; `TodayUiState.Content.weekActivities`).
+- Emulator note: with Docker + Gradle running the AVD ran out of RAM (heavy swap) and showed spurious
+  "isn't responding" dialogs on 15–20 s cold starts; `adb reboot` fixed it. Not an app bug.
+- 173 unit tests pass with -PwarningsAsErrors=true.
+
+## 12. Other files made for the user
 
 - `MANUAL_TEST_CHECKLIST.md`: 67 manual QA cases (written before the redesign; screens changed since).
 - `hosted-setup.sql`: the first 3 migrations combined for the hosted SQL Editor.
+- `hosted-update.sql`: every later migration combined, to paste once on the hosted project.
 - `demo-login.local.txt`: local-only demo login.
