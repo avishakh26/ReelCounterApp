@@ -54,7 +54,7 @@
     <string name="feature_today_access_off_title">Usage access is off</string>
     <string name="feature_today_access_off">Today\'s figures aren\'t updating until you turn it back on.</string>
     <string name="feature_today_turn_on">Turn it back on</string>
-    <string name="feature_today_counted_note">Reels are counted one by one as each new video fills the screen. Days from before counting was on show estimates from app time.</string>
+    <string name="feature_today_counted_note">Reels are counted one by one: each video you stay on for at least 3 seconds. Days from before counting was on show estimates from app time.</string>
     <string name="feature_today_estimate_note">Reel counts are estimates from app time: Android can\'t see which part of an app you\'re using.</string>
     <plurals name="feature_today_bar_reels">
         <item quantity="one">%1$s: about %2$s reel</item>

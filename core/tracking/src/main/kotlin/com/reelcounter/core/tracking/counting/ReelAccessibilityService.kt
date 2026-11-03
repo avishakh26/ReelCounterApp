@@ -31,7 +31,8 @@ import javax.inject.Inject
  * - Instagram Reels: `clips_viewer_view_pager` only, so the home feed, Stories and tabs never count.
  * - TikTok: the vertical `viewpager` of the For You / Following feed.
  * - Facebook: no stable ids, so a full-screen vertical feed showing one full-screen item at a time.
- * [ReelSwipeDetector] turns these observations into counts.
+ * [ReelSwipeDetector] turns these observations into counts: a video counts once it has stayed on
+ * screen for 3 seconds, so quick swipes past it don't.
  */
 @AndroidEntryPoint
 class ReelAccessibilityService : AccessibilityService() {
@@ -65,6 +66,7 @@ class ReelAccessibilityService : AccessibilityService() {
     override fun onUnbind(intent: Intent?): Boolean {
         handler.removeCallbacks(poll)
         polling = false
+        hideAllFeeds()
         scope.launch { recorder.onCountingStopped() }
         return super.onUnbind(intent)
     }
@@ -95,15 +97,37 @@ class ReelAccessibilityService : AccessibilityService() {
         handler.post(poll)
     }
 
-    /** Looks for the feed on screen and counts a new item. False once a watched app isn't in front. */
+    /**
+     * Looks for the feed on screen, notes which video fills it and counts videos that have stayed
+     * long enough. False once a watched app isn't in front.
+     */
     private fun checkScreen(): Boolean {
-        val root = rootInActiveWindow ?: return false
-        val packageName = root.packageName?.toString() ?: return false
-        if (packageName !in WATCHED_PACKAGES) return false
-        val feed = findFeed(root, packageName) ?: return true
-        val item = settledItem(feed) ?: return true
-        if (detector.onItemOnScreen(packageName, item, System.currentTimeMillis())) record(packageName)
+        val now = System.currentTimeMillis()
+        val root = rootInActiveWindow
+        val packageName = root?.packageName?.toString()
+        if (root == null || packageName == null || packageName !in WATCHED_PACKAGES) {
+            // Left the app (or the screen can't be read): count what was watched long enough,
+            // drop a video that was on screen too briefly.
+            hideAllFeeds()
+            return false
+        }
+        WATCHED_PACKAGES.filter { it != packageName }.forEach { other ->
+            if (detector.onFeedHidden(other, now)) record(other)
+        }
+        val feed = findFeed(root, packageName)
+        if (feed == null) {
+            if (detector.onFeedHidden(packageName, now)) record(packageName)
+            return true
+        }
+        val item = settledItem(feed)
+        if (item != null && detector.onItemOnScreen(packageName, item, now)) record(packageName)
+        detector.commitDue(now).forEach(::record)
         return true
+    }
+
+    private fun hideAllFeeds() {
+        val now = System.currentTimeMillis()
+        WATCHED_PACKAGES.forEach { if (detector.onFeedHidden(it, now)) record(it) }
     }
 
     private fun onScrolled(event: AccessibilityEvent, packageName: String) {
@@ -118,6 +142,7 @@ class ReelAccessibilityService : AccessibilityService() {
             else -> false
         }
         if (counted) record(packageName)
+        // The poll counts the new video once it has stayed on screen long enough.
         startPolling()
     }
 

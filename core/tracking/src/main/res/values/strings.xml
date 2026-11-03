@@ -2,5 +2,5 @@
 <resources>
     <!-- Shown in the system's accessibility settings. -->
     <string name="core_tracking_counting_service_label">ReelCounter reel counting</string>
-    <string name="core_tracking_counting_service_description">Counts the short videos you watch in TikTok, Instagram Reels, YouTube Shorts and Facebook Reels, one by one, as each new video fills the screen.\n\nIt looks only at those apps, and only at the layout of their video feed (which item is on screen). It never reads captions, names, comments or messages, never records your screen, and stores nothing but the number of videos.</string>
+    <string name="core_tracking_counting_service_description">Counts the short videos you watch in TikTok, Instagram Reels, YouTube Shorts and Facebook Reels, one by one: a video counts once it has stayed on screen for at least 3 seconds, so quick swipes past it don\'t.\n\nIt looks only at those apps, and only at the layout of their video feed (which item is on screen). It never reads captions, names, comments or messages, never records your screen, and stores nothing but the number of videos.</string>
 </resources>
