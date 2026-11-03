@@ -131,6 +131,10 @@ Design system in `core/designsystem` (all screens use it; no hard-coded colors o
   (only the 8 platform packages; reads view ids, bounds, list positions, scroll direction; never text).
   Feeds: YouTube `reel_recycler` (+1 s polling), Instagram `clips_viewer_view_pager`, TikTok `viewpager`,
   Facebook = generic full-screen vertical pager. Logic in pure `ReelSwipeDetector` (core:domain, tested).
+  **Minimum watch time (2026-11-03):** a video counts only after 3 s on screen (`DEFAULT_MIN_WATCH_MS`);
+  the service calls `commitDue` on its 1 s poll and `onFeedHidden` when the feed/app leaves the screen
+  (too-brief videos are dropped). User chose to keep estimates as the labeled fallback where counting
+  can't run (their phone APK without the service, iPhone, days before counting was on).
 - `ReelCountingRecorder` (domain) → `DefaultReelCountingRecorder` (core:data, also an AppInitializer):
   stores counts in Room `reel_counts` (DB v3), keeps `countingSinceMs`/`countingStoppedAtMs` in
   TrackingPreferences. A rebind gap with no tracked-app use keeps the run. `ReelCountingStatus` reads
