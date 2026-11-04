@@ -49,6 +49,9 @@ lets friends compare. Backend: Supabase (Postgres + RLS, Auth, Realtime).
   Python needs `cygpath -w` paths; complex Python inside bash heredocs can break: write the
   script to a file and run it.
 
+
+
+
 ## 4. Backends and `secrets.properties`
 
 `secrets.properties` (git-ignored, repo root) sets `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
