@@ -52,6 +52,10 @@ lets friends compare. Backend: Supabase (Postgres + RLS, Auth, Realtime).
 
 
 
+
+
+
+
 ## 4. Backends and `secrets.properties`
 
 `secrets.properties` (git-ignored, repo root) sets `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
