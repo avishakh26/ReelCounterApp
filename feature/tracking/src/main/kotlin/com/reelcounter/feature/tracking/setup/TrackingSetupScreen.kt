@@ -111,7 +111,7 @@ internal fun TrackingSetupScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 560.dp)
+                    .widthIn(max = Spacing.formMaxWidth)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.xl, vertical = Spacing.lg),

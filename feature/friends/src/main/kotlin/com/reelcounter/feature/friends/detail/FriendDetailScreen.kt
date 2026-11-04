@@ -137,7 +137,7 @@ private fun FriendContent(state: FriendDetailUiState.Content) {
         if (state.todayActivities.isNotEmpty()) {
             item(key = "apps-title") { Section(stringResource(R.string.feature_friends_detail_by_app)) }
             item(key = "apps") {
-                RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
+                RcListCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth()) {
                     state.todayActivities.forEachIndexed { index, activity ->
                         if (index > 0) RcDivider(startInset = 68.dp)
                         PlatformActivityRow(activity = activity)
@@ -149,7 +149,7 @@ private fun FriendContent(state: FriendDetailUiState.Content) {
             Text(
                 text = stringResource(R.string.feature_friends_detail_live_note, name),
                 modifier = Modifier
-                    .widthIn(max = ContentMaxWidth)
+                    .widthIn(max = Spacing.contentMaxWidth)
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.xs),
                 style = MaterialTheme.typography.bodySmall,
@@ -161,14 +161,14 @@ private fun FriendContent(state: FriendDetailUiState.Content) {
 
 @Composable
 private fun Section(title: String) {
-    RcSectionHeader(title = title, modifier = Modifier.widthIn(max = ContentMaxWidth).padding(top = Spacing.md))
+    RcSectionHeader(title = title, modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).padding(top = Spacing.md))
 }
 
 @Composable
 private fun ProfileHeader(state: FriendDetailUiState.Content) {
     Row(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {},
         horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
@@ -203,7 +203,7 @@ private fun HeroCard(state: FriendDetailUiState.Content) {
     val high = today.countHigh
     val appTime = today.appTime
     RcCard(
-        modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth(),
+        modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth(),
         contentPadding = PaddingValues(Spacing.xl),
     ) {
         Text(
@@ -299,7 +299,7 @@ private fun WeekCard(week: List<DaySummary>) {
     val locale = LocalConfiguration.current.locales[0]
     var selectedDay by rememberSaveable(week.lastOrNull()?.date) { mutableStateOf<Int?>(null) }
     val useCounts = week.any { it.count != null }
-    RcCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth(), mergeSemantics = false) {
+    RcCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth(), mergeSemantics = false) {
         val bars = week.mapIndexed { index, day ->
             val dayName = remember(day.date, locale) { day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale) }
             val fullDate = remember(day.date, locale) { DateTimeFormatter.ofPattern("EEEE d MMMM", locale).format(day.date) }
@@ -347,4 +347,3 @@ private fun WeekCard(week: List<DaySummary>) {
     }
 }
 
-private val ContentMaxWidth = 640.dp

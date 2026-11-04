@@ -92,6 +92,17 @@ is then false and the app skips the CountReels setup step, the disclosure bullet
 falling back to estimates. Verify with `aapt2 dump xmltree <apk> --file AndroidManifest.xml | grep -ci accessibility` → 0. Install: `adb -s emulator-5554 install -r <apk>`.
 Screenshots: `adb exec-out screencap -p > file.png`. Tap by text: `uiautomator dump` then parse bounds.
 
+**Release APK (2026-11-04):** `./gradlew assembleRelease -PreelCounting=false` → ~3.3 MB (R8 + resource
+shrinking; debug is ~27 MB). Verified on the emulator: sign-in, profile setup and all tabs work after R8.
+Signing reads git-ignored `keystore.properties` (+ `*.jks`); without it, release is signed with the debug
+key (warning printed). Steps for the user: `docs/building-release-apk.md`. Release = `com.reelcounter.app`,
+a separate app from debug `.debug`. Release blocks plain http, so testing it on the local backend needs a
+temporary `app/src/release/` copy of the debug network config (delete afterwards).
+- The project now lives in `C:\Users\USER\OneDrive\Desktop\Reel-Counter-main`. Local Supabase containers made
+  at the old path fail (kong mount error, port 54321 dead): `npx supabase stop` then `npx supabase start` fixes it (data kept).
+- Navigation: bottom bar on narrow windows, side rail from 600 dp wide (landscape/tablets), in `ReelCounterApp.kt`.
+  Content widths: `Spacing.contentMaxWidth` (640) and `Spacing.formMaxWidth` (560).
+
 ## 6. UI redesign (done)
 
 Design system in `core/designsystem` (all screens use it; no hard-coded colors or sizes):

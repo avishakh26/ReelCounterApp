@@ -112,7 +112,7 @@ private fun InsightsContent(state: InsightsUiState.Content, modifier: Modifier) 
             RcScreenHeader(
                 title = stringResource(R.string.feature_insights_title),
                 subtitle = stringResource(R.string.feature_insights_subtitle),
-                modifier = Modifier.widthIn(max = ContentMaxWidth),
+                modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
             )
         }
         if (state.hasCounts) {
@@ -125,7 +125,7 @@ private fun InsightsContent(state: InsightsUiState.Content, modifier: Modifier) 
                     selectedIndex = selected,
                     onSelect = { selected = it },
                     modifier = Modifier
-                        .widthIn(max = ContentMaxWidth)
+                        .widthIn(max = Spacing.contentMaxWidth)
                         .padding(top = Spacing.xs),
                 )
             }
@@ -143,7 +143,7 @@ private fun InsightsContent(state: InsightsUiState.Content, modifier: Modifier) 
             Text(
                 text = stringResource(R.string.feature_insights_partial_note),
                 modifier = Modifier
-                    .widthIn(max = ContentMaxWidth)
+                    .widthIn(max = Spacing.contentMaxWidth)
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.xs),
                 style = MaterialTheme.typography.bodySmall,
@@ -158,7 +158,7 @@ private fun SectionTitle(text: String) {
     RcSectionHeader(
         title = text,
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .padding(top = Spacing.md),
     )
 }
@@ -172,7 +172,7 @@ private fun SummaryCard(state: InsightsUiState.Content, metric: InsightsMetric, 
 
     RcCard(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth(),
         contentPadding = PaddingValues(vertical = Spacing.lg, horizontal = Spacing.lg),
         mergeSemantics = false,
@@ -260,7 +260,7 @@ private fun ChartCard(week: List<DaySummary>, metric: InsightsMetric) {
     var selectedDay by rememberSaveable(week.lastOrNull()?.date) { mutableStateOf<Int?>(null) }
     RcCard(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth(),
         mergeSemantics = false,
     ) {
@@ -316,7 +316,7 @@ private fun PlatformsCard(platforms: List<PlatformTotal>, metric: InsightsMetric
     val weekTotal = platforms.sumOf { platformValue(it, metric) ?: 0.0 }
     RcListCard(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth(),
     ) {
         platforms.forEachIndexed { index, total ->
@@ -376,7 +376,7 @@ private fun HistoryCard(days: List<DaySummary>, metric: InsightsMetric) {
     val today = newestFirst.firstOrNull()?.date
     RcListCard(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth(),
     ) {
         newestFirst.forEachIndexed { index, day ->
@@ -453,4 +453,3 @@ private fun formatValue(value: Double, metric: InsightsMetric, isEstimate: Boole
     InsightsMetric.AppTime -> formatAppTime(value.roundToInt().minutes)
 }
 
-private val ContentMaxWidth = 640.dp

@@ -14,19 +14,22 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.reelcounter.app.R
 import com.reelcounter.app.navigation.ReelCounterNavHost
 
 /**
- * The app shell. Navigation adapts to the window: a bottom bar on phones and a rail or drawer on
- * larger screens. Losing connectivity shows a persistent snackbar until the device is back online.
+ * The app shell. Navigation adapts to the window: a bottom bar on phones held upright, and a side
+ * rail once the window is at least [RailMinWidthDp] wide (phones in landscape, foldables, tablets). Losing connectivity shows a persistent snackbar until the device is back online.
  */
 @Composable
 fun ReelCounterApp(
@@ -63,8 +66,17 @@ fun ReelCounterApp(
             unselectedTextColor = colors.onSurfaceVariant,
         ),
     )
+    // The library default keeps the bottom bar whenever the window is short, which in landscape
+    // leaves a quarter of the screen to the bar. A rail on the side keeps the height for content.
+    val windowWidthDp = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp().value }
+    val layoutType = if (windowWidthDp >= RailMinWidthDp) {
+        NavigationSuiteType.NavigationRail
+    } else {
+        NavigationSuiteType.NavigationBar
+    }
     NavigationSuiteScaffold(
         modifier = modifier,
+        layoutType = layoutType,
         navigationSuiteColors = NavigationSuiteDefaults.colors(
             shortNavigationBarContainerColor = colors.surfaceContainerLowest,
             navigationBarContainerColor = colors.surfaceContainerLowest,
@@ -104,3 +116,6 @@ fun ReelCounterApp(
         }
     }
 }
+
+/** Window width (dp) from which navigation moves from the bottom bar to a side rail. */
+private const val RailMinWidthDp = 600

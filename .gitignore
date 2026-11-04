@@ -14,6 +14,7 @@ captures/
 # Local configuration: SDK path and secrets. Never commit these.
 local.properties
 secrets.properties
+keystore.properties
 *.keystore
 *.jks
 google-services.json

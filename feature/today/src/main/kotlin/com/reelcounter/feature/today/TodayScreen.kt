@@ -156,7 +156,7 @@ private fun TodayContent(
                 actionLabel = stringResource(R.string.feature_today_week_action),
                 onAction = onOpenInsights,
                 modifier = Modifier
-                    .widthIn(max = ContentMaxWidth)
+                    .widthIn(max = Spacing.contentMaxWidth)
                     .padding(top = Spacing.md),
             )
         }
@@ -177,12 +177,12 @@ private fun TodayContent(
                         stringResource(R.string.feature_today_by_app_on_day, day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale))
                     } ?: stringResource(R.string.feature_today_by_app_title),
                     modifier = Modifier
-                        .widthIn(max = ContentMaxWidth)
+                        .widthIn(max = Spacing.contentMaxWidth)
                         .padding(top = Spacing.md),
                 )
             }
             item(key = "apps") {
-                RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
+                RcListCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth()) {
                     appActivities.forEachIndexed { index, activity ->
                         if (index > 0) RcDivider(startInset = 68.dp)
                         PlatformActivityRow(activity = activity)
@@ -196,7 +196,7 @@ private fun TodayContent(
                     if (state.countingEnabled) R.string.feature_today_counted_note else R.string.feature_today_estimate_note,
                 ),
                 modifier = Modifier
-                    .widthIn(max = ContentMaxWidth)
+                    .widthIn(max = Spacing.contentMaxWidth)
                     .fillMaxWidth()
                     .padding(top = Spacing.xs, start = Spacing.xs, end = Spacing.xs),
                 style = MaterialTheme.typography.bodySmall,
@@ -213,7 +213,7 @@ private fun TodayHeader(date: LocalDate, profile: UserProfile?, onOpenProfile: (
     RcScreenHeader(
         title = greeting(profile?.greetingName()),
         eyebrow = dateText,
-        modifier = Modifier.widthIn(max = ContentMaxWidth),
+        modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
         trailing = {
             val openProfileLabel = stringResource(R.string.feature_today_open_profile)
             IconButton(
@@ -255,7 +255,7 @@ private fun LazyListScope.statusNotice(status: TrackingStatus, onSetUpTracking: 
                 tone = RcTone.Warning,
                 actionLabel = stringResource(R.string.feature_today_turn_on),
                 onAction = onSetUpTracking,
-                modifier = Modifier.widthIn(max = ContentMaxWidth),
+                modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
             )
         }
         TrackingStatus.Paused -> item(key = "status") {
@@ -264,7 +264,7 @@ private fun LazyListScope.statusNotice(status: TrackingStatus, onSetUpTracking: 
                 message = stringResource(R.string.feature_today_paused),
                 icon = RcIcons.Paused,
                 tone = RcTone.Neutral,
-                modifier = Modifier.widthIn(max = ContentMaxWidth),
+                modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
             )
         }
         else -> Unit
@@ -281,7 +281,7 @@ private fun HeroCard(state: TodayUiState.Content) {
     val appTime = today.appTime
     RcCard(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth(),
         contentPadding = PaddingValues(Spacing.xl),
     ) {
@@ -439,7 +439,7 @@ private fun WeekCard(week: List<DaySummary>, selectedIndex: Int?, onSelectDay: (
 
     RcCard(
         modifier = Modifier
-            .widthIn(max = ContentMaxWidth)
+            .widthIn(max = Spacing.contentMaxWidth)
             .fillMaxWidth(),
         mergeSemantics = false,
     ) {
@@ -526,12 +526,12 @@ private fun TodaySetup(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item(key = "header") {
-            RcScreenHeader(title = greeting(greetingName), modifier = Modifier.widthIn(max = ContentMaxWidth))
+            RcScreenHeader(title = greeting(greetingName), modifier = Modifier.widthIn(max = Spacing.contentMaxWidth))
         }
         item(key = "setup") {
             RcCard(
                 modifier = Modifier
-                    .widthIn(max = ContentMaxWidth)
+                    .widthIn(max = Spacing.contentMaxWidth)
                     .fillMaxWidth(),
                 contentPadding = PaddingValues(Spacing.xl),
                 mergeSemantics = false,
@@ -611,4 +611,3 @@ private fun lastUpdatedText(lastUpdatedMs: Long?): String {
 }
 
 /** Content stays readable on tablets and in landscape instead of stretching edge to edge. */
-private val ContentMaxWidth = 640.dp

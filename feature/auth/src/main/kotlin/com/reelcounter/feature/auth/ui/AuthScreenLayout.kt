@@ -70,7 +70,7 @@ internal fun AuthScreenLayout(
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 480.dp)
+                    .widthIn(max = Spacing.formMaxWidth)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.xl, vertical = Spacing.lg),

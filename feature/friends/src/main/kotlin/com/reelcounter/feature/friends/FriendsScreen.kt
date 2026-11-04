@@ -157,14 +157,14 @@ internal fun FriendsScreen(uiState: FriendsUiState, actions: FriendsActions, mod
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item(key = "header") {
-                RcScreenHeader(title = stringResource(R.string.feature_friends_title), modifier = Modifier.widthIn(max = ContentMaxWidth))
+                RcScreenHeader(title = stringResource(R.string.feature_friends_title), modifier = Modifier.widthIn(max = Spacing.contentMaxWidth))
             }
             item(key = "search") {
                 RcTextField(
                     value = uiState.search.query,
                     onValueChange = actions.onQueryChange,
                     label = stringResource(R.string.feature_friends_search_label),
-                    modifier = Modifier.widthIn(max = ContentMaxWidth),
+                    modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
                     leadingIcon = { Icon(imageVector = RcIcons.Search, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
@@ -191,7 +191,7 @@ internal fun FriendsScreen(uiState: FriendsUiState, actions: FriendsActions, mod
                         ),
                         selectedIndex = sectionIndex,
                         onSelect = { sectionIndex = it },
-                        modifier = Modifier.widthIn(max = ContentMaxWidth),
+                        modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
                     )
                 }
                 when (section) {
@@ -231,11 +231,11 @@ private fun LazyListScope.searchResults(uiState: FriendsUiState, actions: Friend
                 message = stringResource(errorText(search.error)),
                 icon = RcIcons.Error,
                 tone = RcTone.Critical,
-                modifier = Modifier.widthIn(max = ContentMaxWidth),
+                modifier = Modifier.widthIn(max = Spacing.contentMaxWidth),
             )
         }
         search.results == null -> item(key = "searching") {
-            SkeletonCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth())
+            SkeletonCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth())
         }
         search.results.isEmpty() -> item(key = "no-results") {
             EmptyState(
@@ -245,7 +245,7 @@ private fun LazyListScope.searchResults(uiState: FriendsUiState, actions: Friend
             )
         }
         else -> item(key = "results") {
-            RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
+            RcListCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth()) {
                 search.results.forEachIndexed { index, result ->
                     if (index > 0) RcDivider(startInset = 76.dp)
                     val busy = result.user.id in uiState.busyIds
@@ -294,7 +294,7 @@ private fun LazyListScope.whenConnectionsLoaded(
 ) {
     when (val connections = uiState.connections) {
         ConnectionsState.Loading -> items(count = 3, key = { "loading-$it" }) {
-            SkeletonCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth())
+            SkeletonCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth())
         }
         is ConnectionsState.Failed -> item(key = "failed") {
             ErrorState(
@@ -379,7 +379,7 @@ private fun LazyListScope.requests(uiState: FriendsUiState, actions: FriendsActi
 private fun LazyListScope.suggestions(uiState: FriendsUiState, actions: FriendsActions) {
     when (val state = uiState.suggestions) {
         SuggestionsState.Loading -> items(count = 3, key = { "suggest-loading-$it" }) {
-            SkeletonCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth())
+            SkeletonCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth())
         }
         is SuggestionsState.Failed -> item(key = "suggest-failed") {
             ErrorState(
@@ -399,7 +399,7 @@ private fun LazyListScope.suggestions(uiState: FriendsUiState, actions: FriendsA
             }
         } else {
             item(key = "suggest-list") {
-                RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
+                RcListCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth()) {
                     state.people.forEachIndexed { index, suggestion ->
                         if (index > 0) RcDivider(startInset = 76.dp)
                         val user = suggestion.user
@@ -438,12 +438,12 @@ private fun LazyListScope.section(
         RcSectionHeader(
             title = stringResource(R.string.feature_friends_section_count, stringResource(titleRes), users.size),
             modifier = Modifier
-                .widthIn(max = ContentMaxWidth)
+                .widthIn(max = Spacing.contentMaxWidth)
                 .padding(top = Spacing.xs),
         )
     }
     item(key = "list-$key") {
-        RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
+        RcListCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth()) {
             users.forEachIndexed { index, user ->
                 if (index > 0) RcDivider(startInset = 76.dp)
                 row(user)
@@ -484,7 +484,7 @@ private fun TodayFigure(day: DaySummary?) {
 /** Always visible, so users know what friends can see before anyone is added. */
 @Composable
 private fun VisibilityCard(visibility: Visibility?, onOpenPrivacy: () -> Unit) {
-    RcListCard(modifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()) {
+    RcListCard(modifier = Modifier.widthIn(max = Spacing.contentMaxWidth).fillMaxWidth()) {
         RcListRow(
             title = stringResource(R.string.feature_friends_visibility_title),
             summary = stringResource(
@@ -624,4 +624,3 @@ private fun errorText(error: SocialError): Int = when (error) {
     SocialError.NotSignedIn, is SocialError.Unknown -> R.string.feature_friends_error_unknown
 }
 
-private val ContentMaxWidth = 640.dp

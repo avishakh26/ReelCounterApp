@@ -4,7 +4,7 @@
     <string name="feature_settings_back">Back</string>
     <string name="feature_settings_section_about_numbers">About your numbers</string>
     <string name="feature_settings_how_we_count">How ReelCounter counts</string>
-    <string name="feature_settings_how_we_count_summary">What Verified, Estimated and App time only mean</string>
+    <string name="feature_settings_how_we_count_summary">What Counted, Estimated and App time only mean</string>
     <string name="feature_settings_section_account">Account</string>
     <string name="feature_settings_section_tracking">Tracking</string>
     <string name="feature_settings_tracking">Tracking &amp; apps</string>

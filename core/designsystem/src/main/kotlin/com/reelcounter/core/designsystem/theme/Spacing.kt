@@ -22,6 +22,15 @@ object Spacing {
     /** Minimum touch target from the Material and Android accessibility guidelines. */
     val minTouchTarget = 48.dp
 
+    /**
+     * Widest a screen's content column may grow, so text lines and cards stay readable in
+     * landscape, on foldables and on tablets. Screens center the column within the window.
+     */
+    val contentMaxWidth = 640.dp
+
+    /** Widest a form or step-by-step flow may grow (sign-in, profile editor, setup). */
+    val formMaxWidth = 560.dp
+
     /** Height of primary and secondary buttons. */
     val buttonHeight = 52.dp
 }

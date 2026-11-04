@@ -113,7 +113,7 @@ internal fun TrackingSettingsScreen(uiState: TrackingSettingsUiState, actions: T
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 640.dp)
+                    .widthIn(max = Spacing.contentMaxWidth)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(start = Spacing.screen, end = Spacing.screen, top = Spacing.sm, bottom = Spacing.xxl),

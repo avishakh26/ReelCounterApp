@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.reelcounter.android.application)
     alias(libs.plugins.reelcounter.android.application.compose)
@@ -15,6 +17,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing comes from keystore.properties in the repo root (git-ignored; see
+    // docs/building-release-apk.md). Without it, release builds are signed with the debug key so
+    // the APK still installs for testing, but it can't later be updated by a properly signed one.
+    val keystoreFile = rootProject.file("keystore.properties")
+    val releaseSigning = if (keystoreFile.exists()) {
+        val keystore = Properties().apply { keystoreFile.inputStream().use(::load) }
+        signingConfigs.create("release") {
+            storeFile = rootProject.file(keystore.getProperty("storeFile"))
+            storePassword = keystore.getProperty("storePassword")
+            keyAlias = keystore.getProperty("keyAlias")
+            keyPassword = keystore.getProperty("keyPassword")
+        }
+    } else {
+        logger.warn("keystore.properties not found: signing the release APK with the debug key.")
+        signingConfigs.getByName("debug")
+    }
+
     buildTypes {
         debug {
             // Debug and release builds can be installed side by side.
@@ -27,7 +46,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // Release signing is configured in Phase 10; until then release builds are unsigned.
+            signingConfig = releaseSigning
         }
     }
 
