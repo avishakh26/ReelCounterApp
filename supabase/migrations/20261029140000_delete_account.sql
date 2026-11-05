@@ -1,5 +1,5 @@
--- Account deletion from inside the app (Apple App Store guideline 5.1.1(v): apps that let people
--- create an account must let them delete it in the app).
+-- Account deletion from inside the app (Google Play requires apps that let people create an
+-- account to let them delete it in the app).
 --
 -- Deleting the auth user cascades to the profile, privacy settings, devices, platform settings,
 -- daily activity, friendships, blocks and rate limits (all reference profiles / auth.users with

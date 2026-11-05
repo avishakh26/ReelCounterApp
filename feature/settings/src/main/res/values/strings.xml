@@ -18,7 +18,7 @@
     <string name="feature_settings_delete_account">Delete account</string>
     <string name="feature_settings_deleting">Deleting account…</string>
     <string name="feature_settings_delete_title">Delete your account?</string>
-    <string name="feature_settings_delete_message">Your profile, photo, friends and all saved figures are permanently deleted, on Android and iPhone. This can\'t be undone.</string>
+    <string name="feature_settings_delete_message">Your profile, photo, friends and all saved figures are permanently deleted. This can\'t be undone.</string>
     <string name="feature_settings_delete_confirm">Delete account</string>
     <string name="feature_settings_delete_failed_title">Account not deleted</string>
     <string name="feature_settings_delete_failed_offline">Can\'t reach ReelCounter. Check your connection and try again.</string>

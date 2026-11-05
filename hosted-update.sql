@@ -1,7 +1,7 @@
 -- ReelCounter: database updates for the hosted Supabase project.
 --
 -- Paste this whole file into Supabase → SQL Editor → New query, and click Run, ONCE.
--- It adds what the latest Android (and iPhone) app needs on top of hosted-setup.sql:
+-- It adds what the latest Android app needs on top of hosted-setup.sql:
 --   1. Friends' figures with live updates, and friend suggestions
 --   2. The "counted reels" column for reels counted one by one
 --   3. Account deletion from inside the app
@@ -162,8 +162,8 @@ group by user_id, platform_id, activity_date;
 
 -- ═══════════════ 20261029140000_delete_account.sql ═══════════════
 
--- Account deletion from inside the app (Apple App Store guideline 5.1.1(v): apps that let people
--- create an account must let them delete it in the app).
+-- Account deletion from inside the app (Google Play requires apps that let people create an
+-- account to let them delete it in the app).
 --
 -- Deleting the auth user cascades to the profile, privacy settings, devices, platform settings,
 -- daily activity, friendships, blocks and rate limits (all reference profiles / auth.users with

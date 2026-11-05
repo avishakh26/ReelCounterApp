@@ -152,7 +152,7 @@ Design system in `core/designsystem` (all screens use it; no hard-coded colors o
   **Minimum watch time (2026-11-03):** a video counts only after 3 s on screen (`DEFAULT_MIN_WATCH_MS`);
   the service calls `commitDue` on its 1 s poll and `onFeedHidden` when the feed/app leaves the screen
   (too-brief videos are dropped). User chose to keep estimates as the labeled fallback where counting
-  can't run (their phone APK without the service, iPhone, days before counting was on).
+  can't run (their phone APK without the service, days before counting was on).
 - `ReelCountingRecorder` (domain) → `DefaultReelCountingRecorder` (core:data, also an AppInitializer):
   stores counts in Room `reel_counts` (DB v3), keeps `countingSinceMs`/`countingStoppedAtMs` in
   TrackingPreferences. A rebind gap with no tracked-app use keeps the run. `ReelCountingStatus` reads
@@ -166,41 +166,15 @@ Design system in `core/designsystem` (all screens use it; no hard-coded colors o
 - Emulator limits: its YouTube (19.17) is outdated and can't load Shorts; other apps not installed.
   `uiautomator dump` unbinds accessibility services: never use it while testing counting.
 
-## 9. iPhone app (IN PROGRESS, branch `ios-app`, 2026-10-29)
+## 9. iPhone app: REMOVED (2026-11-05)
 
-The user asked for an iPhone version; chose a native SwiftUI app, has **no Mac** and **no Apple
-Developer account yet**. Everything is in `ios/` (see `ios/README.md`), developed on branch `ios-app`
-(not merged to `main`).
-- Built and tested only on GitHub Actions macOS runners (`.github/workflows/ios.yml`): job "Core logic
-  tests" (`swift test` on `ios/ReelCounterCore`) and "App build (simulator)" (XcodeGen + xcodebuild,
-  no signing). Errors are turned into one check-run annotation by `ios/ci/annotate-errors.sh`, readable
-  without login: `curl .../actions/runs?head_sha=<sha>` → jobs → `check-runs/<id>/annotations`.
-- Same Supabase backend and account as Android. iOS can't read other apps' usage directly: Screen Time
-  (FamilyControls + DeviceActivity). The user picks each platform's app in Apple's picker; one
-  DeviceActivity schedule per platform with threshold events (`UsageThresholds`, 45 steps up to 10 h);
-  the `ReelCounterMonitor` extension records the highest step per day/platform in App Group
-  `group.com.reelcounter.app` (`UsageStore`). The app estimates with Android's formula and uploads
-  `daily_activity_summaries` rows (source `usage_stats`, quality ESTIMATED, session_count 0) on open and
-  via BGAppRefresh. No per-video counting on iPhone.
-- Secrets: `ios/Config/Secrets.xcconfig` (git-ignored, hosted values) overrides `App.xcconfig` placeholders.
-- New migration `supabase/migrations/20261029140000_delete_account.sql` (`delete_my_account()`): Apple
-  requires in-app account deletion. Not applied anywhere yet.
-- To ship: Apple Developer Program, Family Controls (Distribution) entitlement request for both bundle
-  ids (`com.reelcounter.app`, `.monitor`), App Group, then TestFlight via CI. Screen Time only works on
-  a real iPhone, never the simulator.
-- Design review without a Mac: job "Screenshots" runs `ios/ReelCounterTests/ScreenshotTests.swift` on a
-  simulator (windows must use the host app's `UIWindowScene`, else images are blank) and force-pushes the
-  PNGs to branch `ios-screenshots`; fetch them from raw.githubusercontent.com. Fixtures are test-only;
-  `seedForScreenshots` hooks in FriendsStore/SessionStore are `#if DEBUG`. All 10 screens reviewed light/dark.
-- **Free edition** (user has no paid account): target `ReelCounterFree`, flag `FREE_EDITION`, no
-  entitlements/extension; `TrackingStore.Status.unavailable` + `TrackingUnavailableNotice`. CI job
-  "Free edition (.ipa)" uploads artifact `ReelCounter-free-ipa` (private to signed-in users). Publishing it as a
-  public GitHub release was blocked by the permission check: ask the user before making it public.
-  Needs repo secrets `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` (user adds them). Sideloadly + free Apple ID, 7-day expiry.
-- Also on this branch: `gradlew` marked executable (Android CI on `main` failed with exit 126 without it),
-  and Android **Delete account** (Settings → Account; `AuthRepository.deleteAccount` → avatar files, then
-  `delete_my_account` RPC; Google Play requires it). DB tests for it in `supabase/tests/pglite/run.mjs`
-  (142 pass). Android: 166 unit tests pass with `-PwarningsAsErrors=true`.
+A SwiftUI iPhone app was built in `ios/` on branch `ios-app` (2026-10-29..31); the user asked to remove
+all iOS work, so `ios/` and `.github/workflows/ios.yml` were deleted (still in git history before that
+commit). Don't re-add iOS unless asked. Android work done on the same branch stays:
+- `gradlew` marked executable (Android CI on `main` failed with exit 126 without it).
+- Android **Delete account** (Settings → Account; `AuthRepository.deleteAccount`; Google Play requires it),
+  backed by migration `20261029140000_delete_account.sql` (`delete_my_account()`). DB tests in
+  `supabase/tests/pglite/run.mjs`.
 
 ## 10. Bug-hunt fixes (2026-10-30, branch `ios-app`)
 
@@ -212,8 +186,7 @@ QA on the emulator (local backend, two accounts) plus probing the hosted project
   (`SupabaseFriendActivityRemoteDataSource`); PGRST202/42883/42703 map to `SocialError.ServerOutdated` /
   `AuthError.ServerOutdated` with "needs its latest database update" messages.
 - Delete account: delete_my_account first, then remove avatar files (session still accepted). Verified the
-  photo can be removed after the user row is gone. **iOS `SessionStore.deleteAccount` still deletes the photo
-  first** (user said to leave iOS for now).
+  photo can be removed after the user row is gone.
 - New migration `20261030120000_privacy_change_notify.sql`: changing activity_visibility/stealth_mode sends
   `activity` to friends, so open friend pages update live. FriendDetail has working pull-to-refresh again.
 - Daily averages leave out today until it's over (`daysForAverage` in core/ui), unless today is the only day.
