@@ -2,7 +2,9 @@ package com.reelcounter.core.work
 
 import android.content.Context
 import androidx.work.BackoffPolicy
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
@@ -19,6 +21,22 @@ object TrackingWork {
         val request = PeriodicWorkRequestBuilder<UsageIngestWorker>(1, TimeUnit.HOURS, 15, TimeUnit.MINUTES)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(PERIODIC_INGEST, ExistingPeriodicWorkPolicy.UPDATE, request)
+        val workManager = WorkManager.getInstance(context)
+        workManager.enqueueUniquePeriodicWork(PERIODIC_INGEST, ExistingPeriodicWorkPolicy.UPDATE, request)
+
+        // Safety net: uploads rows a failed or skipped one-off sync left behind. Incremental (only
+        // dirty rows go up, nothing is sent when nothing changed), online only, never on low battery.
+        val sync = PeriodicWorkRequestBuilder<ActivitySyncWorker>(3, TimeUnit.HOURS, 30, TimeUnit.MINUTES)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
+                    .build(),
+            )
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+        workManager.enqueueUniquePeriodicWork(PERIODIC_SYNC, ExistingPeriodicWorkPolicy.UPDATE, sync)
     }
+
+    private const val PERIODIC_SYNC = "activity-sync-periodic"
 }

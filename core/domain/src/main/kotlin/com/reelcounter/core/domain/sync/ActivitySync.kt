@@ -2,6 +2,9 @@ package com.reelcounter.core.domain.sync
 
 /** Uploads this device's changed daily rows to the user's account. */
 interface ActivitySync {
+    /** When the last sync finished successfully; null before the first one. */
+    val lastSyncMs: kotlinx.coroutines.flow.Flow<Long?>
+
     suspend fun syncNow(): SyncResult
 }
 

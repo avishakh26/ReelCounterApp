@@ -16,7 +16,10 @@ import com.reelcounter.core.network.RemoteException
 import com.reelcounter.core.network.SupabaseConfig
 import com.reelcounter.core.network.activity.ActivityRemoteDataSource
 import com.reelcounter.core.network.activity.NetworkDailySummary
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
@@ -48,6 +51,8 @@ internal class ActivitySyncer @Inject constructor(
 ) : ActivitySync {
 
     private val mutex = Mutex()
+
+    override val lastSyncMs: Flow<Long?> = syncPreferences.state.map { it.lastSyncMs }.distinctUntilChanged()
 
     override suspend fun syncNow(): SyncResult = mutex.withLock {
         if (!config.isConfigured) return SyncResult.NotConfigured
